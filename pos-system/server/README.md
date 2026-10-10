@@ -1,71 +1,82 @@
-# 🔌 Relay WebSocket pentru ecranul client (cross-dispozitiv)
+# 🔌 Server combinat POS (static + relay WebSocket)
 
-Acest mic server face ca **produsele scanate în ecranul operator** (laptop)
-să ajungă **pe telefonul client** (ecranul client), chiar dacă cele două
-dispozitive sunt pe rețele diferite. Netlify e hosting static și nu poate ține
-un server, de aceea relay-ul se găzduiește separat (gratuit).
+Un singur proces Node, **zero dependențe**, care face DOUĂ lucruri pe același port:
 
-- **Zero dependențe** — doar `http` + `crypto` din Node.js (nimic de instalat).
-- Organizează clienții în **camere** (`room`): fiecare magazin folosește o
-  cameră proprie, astfel încât magazinele nu se amestecă.
-- Păstrează **ultima stare a coșului** per cameră și o trimite imediat
-  oricărui client nou conectat (telefonul deschis mai târziu afișează imediat
-  comanda curentă).
-- Nu face echo către expeditor și are heartbeat ping/pong.
+1. Servește fișierele statice ale POS-ului (`pos-system/`: `index.html`, `js/`, `css/` …).
+2. Ține un **relay WebSocket** pentru sincronizarea **ecran operator ↔ ecran client**,
+   chiar și pe dispozitive diferite (ex: laptopul + telefonul pe aceeași rețea Wi-Fi).
 
-## Rulare locală (test)
+Avantaj: pe localhost (sau rețeaua locală) **nu configurezi nimic** — `sync.js`
+se conectează automat la relay-ul de pe aceeași origine.
+
+---
+
+## 🚀 Rulare locală (cea mai simplă — recomandată)
+
+Din dosarul `pos-system`:
 
 ```bash
-cd server
-node relay-server.js
-# ascultă pe PORT (implicit 3000)
-# health-check: http://localhost:3000/healthz
+npm start
+# sau direct:
+node server/relay-server.js
 ```
 
-## Găzduire gratuită (alege una)
+Serverul pornește pe `PORT` (implicit **8080**). Deschide în browser:
 
-### 1) Render
-1. Creează un **New Web Service** din repo (sau „Upload").
-2. Root directory: `pos-system/server`.
-3. **Build Command:** (gol) · **Start Command:** `node relay-server.js`.
-4. În *Environment*, setează `PORT` = `10000` (Render îl injectează automat).
-5. După deploy obții un URL de forma `https://pos-relay-xxxx.onrender.com`.
-   În Setările POS pui **URL relay = `wss://pos-relay-xxxx.onrender.com`**.
+- **Ecran operator:** http://localhost:8080/pos.html
+- **Ecran client (telefon):** http://localhost:8080/client-display.html
 
-> Render „adormește" serviciul gratuit după idle; prima conectare poate dura
-> câteva secunde (se trezește). E suficient pentru un ecran client.
+Produsele adăugate la casă apar **instant** pe ecranul client.
 
-### 2) Railway
-1. „New Project” → „Deploy from GitHub” (sau „Empty Project” + `railway up`).
-2. Root: `pos-system/server`, start `node relay-server.js`.
-3. Obții un URL `https://<slug>.up.railway.app`. Pui `wss://<slug>.up.railway.app`.
+### Telefon pe aceeași rețea Wi-Fi (dispozitiv diferit)
+1. Găsește IP-ul local al laptopului (ex: `192.168.1.25`).
+2. Pe telefon deschide `http://192.168.1.25:8080/client-display.html`.
+3. Gata — se sincronizează automat cu operatorul de pe laptop (relay-ul e pe
+   același server). Nu e nevoie de conturi, chei sau hosting extern.
 
-### 3) Fly.io
-```bash
-cd pos-system/server
-fly launch --no-deploy   # alege regiunea; editează apoi fly.toml: internal_port = 3000
-fly deploy
-```
+> Dacă ai un firewall, permite portul 8080 (sau cel ales în `PORT`).
 
-## Configurare în POS
+---
 
-În aplicație → **Setări → „Ecran client pe telefon"**:
-- **URL relay:** `wss://<url-obtinut>` (atenție la `wss://`, nu `https://`).
-- **Camera:** un ID scurt, unic pe magazin (ex: `magazin-1`). Toate ecranele
-  operator + client care folosesc aceeași cameră se sincronizează între ele.
+## ⚙️ Setări (opțional)
 
-Apasă **🔌 Testează conexiunea** — dacă scrie „conectat", mergi pe telefon la
-`…/client-display.html` și vei vedea imediat produsele adăugate la casă.
+În aplicație → **Setări → „Ecran client pe telefon"** poți totuși să:
+- setezi manual **URL relay** (`ws://localhost:8080/` sau `ws://IP:PORT/`) și
+- o **cameră** (ID unic per magazin, dacă ai mai multe case de marcat pe aceeași rețea).
+
+Dacă lași URL-ul gol, `sync.js` folosește automat relay-ul de pe aceeași origine.
+
+---
+
+## ☁️ Găzduire pe internet (alternativă la localhost)
+
+Pentru ca un telefon să se conecteze de oriunde (nu doar din rețeaua locală),
+găzduiește același server pe un serviciu gratuit. Fiindcă servește și fișierele
+statice, obții **tot POS-ul + relay-ul** la un singur URL.
+
+### Render
+1. New Web Service din repo. Root directory: `pos-system/server`.
+2. Build Command: (gol) · Start Command: `node relay-server.js`.
+3. Obții `https://pos-relay-xxxx.onrender.com`. Relay-ul e accesibil la
+   `wss://pos-relay-xxxx.onrender.com/` (pui acest URL în Setări dacă vrei să
+   forțezi o origine diferită de cea a POS-ului).
+
+### Railway / Fly.io
+La fel: punctul de intrare e `node relay-server.js` (portul e injectat prin `PORT`).
+
+---
+
+## 🔧 Variabile de mediu
+| Variabilă | Implicit | Rol |
+|---|---|---|
+| `PORT` | `8080` | Portul pe care ascultă serverul (HTTP + WebSocket) |
 
 ## Protocol (pentru referință)
-
 Mesaje JSON peste WebSocket:
-
 ```json
 { "type": "cart:update" | "payment:select" | "payment:done" | "cart:clear" | "client:hello" | "sync:ping",
-  "payload": { }, "ts": 1690000000000, "room": "magazin-1" }
+  "payload": { }, "ts": 1690000000000, "room": "default" }
 ```
-
-Serverul difuzează fiecare mesaj către **celelalte** conexiuni din aceeași
-`room` și păstrează ultimul snapshot (`cart:update` / `payment:*` / `cart:clear`)
-pentru clienții ce se conectează ulterior.
+Serverul difuzează fiecare mesaj către **celelalte** conexiuni din aceeași `room`
+și păstrează ultimul snapshot (`cart:update` / `payment:*` / `cart:clear`) pentru
+clienții ce se conectează ulterior.

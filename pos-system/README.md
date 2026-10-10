@@ -74,11 +74,13 @@ netlify deploy --prod --dir=.
 2. Pe telefon deschide același URL `https://site-ul-tau.netlify.app/client-display.html`.
 3. **Dacă telefonul e pe același dispozitiv/browser** (tab nou), sincronizarea merge
    automat prin `BroadcastChannel` + `localStorage` (aceeași origine).
-4. **Dacă telefonul e un dispozitiv separat** (rețea diferită), ai nevoie de un relay WebSocket:
-   - Găzduiește `server/relay-server.js` (gratuit pe Render/Railway/Fly — vezi `server/README.md`).
-   - În POS → **Setări → „Ecran client pe telefon"** pui **URL relay** (`wss://…`) și o **cameră**
-     unică pe magazin, apoi apesi **🔌 Testează conexiunea**.
-   - Produsele scanate la casă apar instant pe telefon. Vezi [Sincronizare cross-dispozitiv](#-sincronizare-cross-dispozitiv-operator--client).
+4. **Dacă telefonul e un dispozitiv separat** (alt telefon pe aceeași rețea Wi-Fi):
+   - Pornește serverul combinat: `cd pos-system && npm start` (ascultă pe `localhost:8080`,
+     servește POS-ul **și** relay-ul WebSocket). Vezi `server/README.md`.
+   - Pe telefon deschide `http://IP-LAPTOP:8080/client-display.html` → se sincronizează
+     automat cu operatorul. Zero configurare (relay-ul e pe aceeași origine).
+   - (Opțional) poți forța un relay extern din **Setări → „Ecran client pe telefon"**.
+   Vezi [Sincronizare cross-dispozitiv](#-sincronizare-cross-dispozitiv-operator--client).
 
 ---
 
@@ -273,15 +275,25 @@ operator. Funcționează prin **trei transporturi** tranzitate simultan în `js/
 | `localStorage` + eveniment `storage` | fallback universal, același browser | nu |
 | **WebSocket relay** | **dispozitive diferite** (laptop + telefon, rețele diferite) | da (`server/relay-server.js`) |
 
-### Cum se activează modul cross-dispozitiv
-1. Găzduiește `server/relay-server.js` (gratuit pe Render / Railway / Fly — instrucțiuni în `server/README.md`).
-   Obții un URL de forma `wss://pos-relay-xxxx.onrender.com`.
-2. În POS → **Setări → „Ecran client pe telefon"**:
-   - **URL relay** = `wss://pos-relay-xxxx.onrender.com`
-   - **Camera** = un ID scurt, unic per magazin (ex: `magazin-1`). Toate ecranele
-     operator + client cu aceeași cameră se sincronizează între ele.
-3. Apasă **🔌 Testează conexiunea** (statusul trebuie să devină „conectat").
-4. Deschide `client-display.html` pe telefon → produsele adăugate la casă apar instant.
+### Varianta LOCALĂ (cea mai simplă — fără hosting extern)
+`server/relay-server.js` este acum un **server combinat**: servește fișierele
+statice ale POS-ului **și** ține relay-ul WebSocket pe **același port**.
+`js/sync.js` se conectează automat la relay-ul de pe aceeași origine → zero config.
+
+```bash
+cd pos-system
+npm start              # sau: node server/relay-server.js  (PORT implicit 8080)
+```
+
+- **Operator:** http://localhost:8080/pos.html
+- **Client (telefon pe aceeași Wi-Fi):** http://IP-LAPTOP:8080/client-display.html
+
+Detalii și modul de găzduire pe internet în `server/README.md`.
+
+### (Opțional) Forțarea unui relay explicit
+Dacă vrei să folosești un relay găzduit separat (ex: Render), în POS →
+**Setări → „Ecran client pe telefon"** pui **URL relay** (`wss://…`) și o **cameră**
+(unică per magazin) și apeși **🔌 Testează conexiunea**.
 
 Relay-ul păstrează **ultima stare a coșului** per cameră și o trimite imediat
 oricărui client nou conectat, deci un telefon deschis ulterior preia comanda

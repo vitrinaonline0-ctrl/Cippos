@@ -31,6 +31,7 @@
   var wsRoom = 'default';
   var wsOpen = false;
   var wsClosedByUs = false;
+  var wsPersistent = true;     // true = reconecteaza la infinit; false = incearca o data (auto same-origin)
   var wsRetry = 0;
   var wsReconnectTimer = null;
   var relayStatusCbs = [];
@@ -134,7 +135,20 @@
 
   function autoConnect() {
     var c = readCfg();
-    if (c.url) connectRelay(c.url, c.room);
+    if (c.url) { connectRelay(c.url, c.room, true); return; }
+    // Fara relay configurat -> incearca relay-ul de pe ACEEASI origine
+    // (serverul combinat local serveste simultan static + WebSocket).
+    var same = autoRelayUrl();
+    if (same) connectRelay(same, c.room, false);
+  }
+
+  /* URL-ul relay-ului de pe aceeasi origine (ex: ws://localhost:8080/) */
+  function autoRelayUrl() {
+    try {
+      if (!global.location || !global.location.host) return '';
+      var proto = (global.location.protocol === 'https:') ? 'wss:' : 'ws:';
+      return proto + '//' + global.location.host + '/';
+    } catch (e) { return ''; }
   }
 
   /* Seteaza relay-ul din pagina de Setari (persista in localStorage + reconnect) */
@@ -156,7 +170,8 @@
   /* ========================================================================
      RELAY WEBSOCKET
      ======================================================================== */
-  function connectRelay(url, room) {
+  function connectRelay(url, room, persistent) {
+    wsPersistent = (persistent !== false);
     if (typeof global.WebSocket === 'undefined') return;
     if (!/^wss?:\/\//i.test(url)) { console.warn('[Sync] relayUrl invalid:', url); return; }
 
@@ -185,8 +200,9 @@
       if (m && m.type) receive(m);
     };
     ws.onclose = function () {
-      wsOpen = false; emitRelayStatus('closed');
-      if (!wsClosedByUs) scheduleReconnect();
+      wsOpen = false;
+      if (!wsClosedByUs && wsPersistent) { emitRelayStatus('closed'); scheduleReconnect(); }
+      else emitRelayStatus('disabled');
     };
     ws.onerror = function () { try { ws.close(); } catch (e) { } };
   }
@@ -214,7 +230,8 @@
 
   function relayStatus() {
     if (!wsUrl) return 'disabled';
-    return wsOpen ? 'open' : 'connecting';
+    if (wsOpen) return 'open';
+    return wsPersistent ? 'connecting' : 'disabled';
   }
 
   function onRelayStatus(cb) { relayStatusCbs.push(cb); }

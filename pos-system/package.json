@@ -1,0 +1,12 @@
+{
+  "name": "pos-system",
+  "version": "1.0.0",
+  "description": "POS System (Casa de marcat) + server combinat static + relay WebSocket pentru ecranul client.",
+  "scripts": {
+    "start": "node server/relay-server.js"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "license": "MIT"
+}

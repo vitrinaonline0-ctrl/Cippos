@@ -2,48 +2,89 @@
 'use strict';
 
 /* ==========================================================================
-   relay-server.js — Server WebSocket de releu PENTRU SINCRONIZAREA
-   ECRAN OPERATOR  ↔  ECRAN CLIENT (dispozitive diferite, ex: laptop + telefon)
+   relay-server.js — Server combinat PENTRU SINCRONIZAREA
+   ECRAN OPERATOR  ↔  ECRAN CLIENT  (pe localhost / rețea locală)
 
-   • Zero dependențe (doar modulul standard `http` + `crypto` din Node).
-   • Rulează pe PORT (Render/Railway/Fly injectează PORT automat).
+   Un singur proces, un singur port, două roluri:
+     1) Servește fișierele statice ale POS-ului (index.html, js/, css/ …)
+        → deschizi http://localhost:8080 in browser.
+     2) Ține un relay WebSocket pentru sincronizarea operator ↔ client.
+
+   Astfel, pe localhost (sau rețeaua locală) totul merge FĂRĂ configurare:
+   sync.js se conectează automat la relay-ul de pe aceeași origine.
+   Pentru producție poți găzdui același server pe Render/Railway/Fly.
+
+   • Zero dependențe (doar http, crypto, fs, path din Node).
    • Organizează clienții în „camere” (room) — fiecare magazin folosește o
      cameră proprie, astfel încât magazinele nu se amestecă.
    • Păstrează ULTIMA stare cunoscută a cosului per cameră și o trimite
-     imediat oricărui client nou conectat (telefonul deschis mai târziu
-     afișează imediat comanda curentă).
-   • Nu face echo către expeditor (operatorul nu-și primește propriul mesaj).
+     imediat oricărui client nou conectat.
+   • Nu face echo către expeditor.
    • Heartbeat ping/pong pentru a detecta conexiunile moarte.
-
-   Protocol mesaje (JSON):
-     { "type": "cart:update" | "payment:select" | "payment:done" |
-              "cart:clear" | "client:hello" | "sync:ping",
-       "payload": { ... }, "ts": 1234567890, "room": "magazin-1" }
    ========================================================================== */
 
 const http = require('http');
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 
-const PORT = process.env.PORT || 3000;
-const PING_INTERVAL = 25000;          // ms — heartbeat
+const PORT = process.env.PORT || 8080;
 const WS_GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
-const MAX_MSG = 1 * 1024 * 1024;      // 1 MB — plafon de siguranță
+const PING_INTERVAL = 25000;
+const MAX_MSG = 1 * 1024 * 1024;
+
+/* Directorul cu fișierele statice = dosarul părinte (pos-system) */
+const STATIC_DIR = path.resolve(__dirname, '..');
+
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.webmanifest': 'application/manifest+json'
+};
 
 /* room -> Set<conn> ; room -> ultima stare snapshot */
 const rooms = new Map();
 const lastState = new Map();
 
 /* --------------------------------------------------------------------------
-   Server HTTP (doar pentru health-check; upgrade-ul WS se face separat)
+   Server HTTP (fișiere statice + health-check; upgrade-ul WS altundeva)
    -------------------------------------------------------------------------- */
 const server = http.createServer(function (req, res) {
-  if (req.url === '/healthz' || req.url === '/') {
+  if (req.url === '/healthz') {
     res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
-    res.end('POS relay ok — ' + rooms.size + ' camere active\n');
+    res.end('POS relay + static ok — ' + rooms.size + ' camere active\n');
     return;
   }
-  res.writeHead(426, { 'Content-Type': 'text/plain' });
-  res.end('Upgrade Required (folosește ws:// sau wss://)\n');
+
+  let urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
+  if (urlPath === '/') urlPath = '/index.html';
+
+  // Rezolvă calea și blochează traversarea în afara STATIC_DIR
+  const filePath = path.normalize(path.join(STATIC_DIR, urlPath));
+  if (filePath !== STATIC_DIR && !filePath.startsWith(STATIC_DIR + path.sep)) {
+    res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('403 Forbidden\n');
+    return;
+  }
+
+  fs.readFile(filePath, function (err, data) {
+    if (err) {
+      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.end('404 Not Found\n');
+      return;
+    }
+    const ext = path.extname(filePath).toLowerCase();
+    res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
+    res.end(data);
+  });
 });
 
 /* --------------------------------------------------------------------------
@@ -79,7 +120,7 @@ function createConnection(socket, head) {
     buffer = Buffer.concat([buffer, chunk]);
     let frame;
     while ((frame = parseFrame(buffer)) !== null) {
-      if (frame === false) break;        // date insuficiente → așteaptă
+      if (frame === false) break;
       buffer = frame.rest;
       handleFrame(conn, frame);
       if (socket.destroyed) break;
@@ -92,7 +133,6 @@ function createConnection(socket, head) {
   return conn;
 }
 
-/* Întoarce null = așteaptă mai multe date, false = neverosimil, sau frame-ul */
 function parseFrame(buf) {
   if (buf.length < 2) return null;
   const b0 = buf[0];
@@ -120,8 +160,8 @@ function parseFrame(buf) {
     offset += 4;
   }
 
-  if (buf.length < offset + len) return null;     // payload incomplet
-  if (len > MAX_MSG) { return false; }            // prea mare → ignoră
+  if (buf.length < offset + len) return null;
+  if (len > MAX_MSG) return false;
 
   let payload = buf.slice(offset, offset + len);
   if (masked) {
@@ -136,17 +176,17 @@ function parseFrame(buf) {
 function handleFrame(conn, frame) {
   const op = frame.opcode;
 
-  if (op === 0x8) {                               // close
+  if (op === 0x8) {
     try { sendFrame(conn.socket, 0x8, Buffer.alloc(0)); } catch (e) {}
     try { conn.socket.end(); } catch (e) {}
     leave(conn);
     return;
   }
-  if (op === 0x9) {                               // ping → răspunde pong
+  if (op === 0x9) {
     try { sendFrame(conn.socket, 0xA, frame.payload); } catch (e) {}
     return;
   }
-  if (op === 0xA) {                               // pong
+  if (op === 0xA) {
     conn.isAlive = true;
     return;
   }
@@ -155,15 +195,15 @@ function handleFrame(conn, frame) {
   if (isText) {
     conn.frags = [frame.payload];
     conn.fin = frame.fin;
-  } else if (op === 0x0) {                        // continuation (fragmentare)
+  } else if (op === 0x0) {
     conn.frags = conn.frags || [];
     conn.frags.push(frame.payload);
     conn.fin = frame.fin;
   } else {
-    return;                                       // opcode necunoscut
+    return;
   }
 
-  if (!conn.fin) return;                          // așteaptă fragmentele următoare
+  if (!conn.fin) return;
 
   const full = Buffer.concat(conn.frags || []);
   conn.frags = null;
@@ -195,7 +235,6 @@ function onMessage(conn, msg) {
   if (!msg || typeof msg !== 'object') return;
   const room = sanitizeRoom(msg.room);
 
-  // (Re)alocă camera și trimite imediat ultima stare cunoscută
   if (conn.room !== room) {
     if (conn.room) leaveRoom(conn, conn.room);
     joinRoom(conn, room);
@@ -205,7 +244,6 @@ function onMessage(conn, msg) {
     }
   }
 
-  // Ping de sănătate
   if (msg.type === 'sync:ping') {
     try {
       sendFrame(conn.socket, 0x1, Buffer.from(JSON.stringify({
@@ -217,7 +255,6 @@ function onMessage(conn, msg) {
 
   if (!msg.type) return;
 
-  // Salvează snapshot-ul pentru clienții ce se conectează ulterior
   if (SNAPSHOT_TYPES[msg.type]) {
     lastState.set(room, {
       type: msg.type,
@@ -226,7 +263,6 @@ function onMessage(conn, msg) {
     });
   }
 
-  // Difuzează către CELELALTE conexiuni din aceeași cameră (fără echo)
   broadcast(room, conn, msg);
 }
 
@@ -236,8 +272,8 @@ function broadcast(room, fromConn, msg) {
   let data;
   try { data = Buffer.from(JSON.stringify(msg)); } catch (e) { return; }
   set.forEach(function (c) {
-    if (c === fromConn) return;                   // nu trimite înapoi expeditorului
-    try { sendFrame(c.socket, 0x1, data); } catch (e) { /* mort */ }
+    if (c === fromConn) return;
+    try { sendFrame(c.socket, 0x1, data); } catch (e) {}
   });
 }
 
@@ -260,9 +296,6 @@ function leave(conn) {
   if (conn.room) leaveRoom(conn, conn.room);
 }
 
-/* --------------------------------------------------------------------------
-   Trimitere frame (server → client, NEMASCAT)
-   -------------------------------------------------------------------------- */
 function sendFrame(socket, opcode, payload) {
   if (!socket || socket.destroyed) throw new Error('socket distrus');
   const len = payload.length;
@@ -279,13 +312,10 @@ function sendFrame(socket, opcode, payload) {
     header[1] = 127;
     header.writeBigUInt64BE(BigInt(len), 2);
   }
-  header[0] = 0x80 | opcode;                      // FIN + opcode
+  header[0] = 0x80 | opcode;
   socket.write(Buffer.concat([header, payload]));
 }
 
-/* --------------------------------------------------------------------------
-   Heartbeat — închide conexiunile care nu răspund la ping
-   -------------------------------------------------------------------------- */
 setInterval(function () {
   rooms.forEach(function (set) {
     set.forEach(function (c) {
@@ -301,5 +331,6 @@ setInterval(function () {
 }, PING_INTERVAL);
 
 server.listen(PORT, function () {
-  console.log('[POS relay] ascultă pe portul ' + PORT);
+  console.log('[POS] server combinat pe http://localhost:' + PORT +
+    '  (relay WebSocket pe aceeasi origine)');
 });
