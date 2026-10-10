@@ -72,9 +72,13 @@ netlify deploy --prod --dir=.
 ### După deploy — ecranul client pe telefon
 1. În ecranul operator apasă **📱 Ecran client** (deschide `client-display.html` într-un tab nou).
 2. Pe telefon deschide același URL `https://site-ul-tau.netlify.app/client-display.html`.
-3. Ambele pagini trebuie să fie **în același browser, pe același dispozitiv**
-   (sincronizarea folosește `BroadcastChannel` + `localStorage`, adică aceeași origine).
-   Pentru un telefon separat ai nevoie de un mic server WebSocket — vezi [Limitări](#-limitări-cunoscute).
+3. **Dacă telefonul e pe același dispozitiv/browser** (tab nou), sincronizarea merge
+   automat prin `BroadcastChannel` + `localStorage` (aceeași origine).
+4. **Dacă telefonul e un dispozitiv separat** (rețea diferită), ai nevoie de un relay WebSocket:
+   - Găzduiește `server/relay-server.js` (gratuit pe Render/Railway/Fly — vezi `server/README.md`).
+   - În POS → **Setări → „Ecran client pe telefon"** pui **URL relay** (`wss://…`) și o **cameră**
+     unică pe magazin, apoi apesi **🔌 Testează conexiunea**.
+   - Produsele scanate la casă apar instant pe telefon. Vezi [Sincronizare cross-dispozitiv](#-sincronizare-cross-dispozitiv-operator--client).
 
 ---
 
@@ -258,13 +262,40 @@ lipsa IndexedDB.
 
 ---
 
+## 🔌 Sincronizare cross-dispozitiv (operator ↔ client)
+
+Ecranul client (telefonul de la casă) primește în timp real cosul de la ecranul
+operator. Funcționează prin **trei transporturi** tranzitate simultan în `js/sync.js`:
+
+| Transport | Când e folosit | Necesită server |
+|---|---|---|
+| `BroadcastChannel` | tab-uri din același browser (rapid) | nu |
+| `localStorage` + eveniment `storage` | fallback universal, același browser | nu |
+| **WebSocket relay** | **dispozitive diferite** (laptop + telefon, rețele diferite) | da (`server/relay-server.js`) |
+
+### Cum se activează modul cross-dispozitiv
+1. Găzduiește `server/relay-server.js` (gratuit pe Render / Railway / Fly — instrucțiuni în `server/README.md`).
+   Obții un URL de forma `wss://pos-relay-xxxx.onrender.com`.
+2. În POS → **Setări → „Ecran client pe telefon"**:
+   - **URL relay** = `wss://pos-relay-xxxx.onrender.com`
+   - **Camera** = un ID scurt, unic per magazin (ex: `magazin-1`). Toate ecranele
+     operator + client cu aceeași cameră se sincronizează între ele.
+3. Apasă **🔌 Testează conexiunea** (statusul trebuie să devină „conectat").
+4. Deschide `client-display.html` pe telefon → produsele adăugate la casă apar instant.
+
+Relay-ul păstrează **ultima stare a coșului** per cameră și o trimite imediat
+oricărui client nou conectat, deci un telefon deschis ulterior preia comanda
+curentă fără să aștepte următoarea scanare.
+
 ## ⚠️ Limitări cunoscute
 
 1. **Datele sunt locale.** Fiecare browser/dispozitiv are propria bază. Backup/restore JSON este mecanismul
    de mutare a datelor.
-2. **Sincronizarea operator ↔ client** funcționează între tab-uri din același browser.
-   Pentru un telefon separat (client display pe alt dispozitiv) adaugă un canal WebSocket/Firebase —
-   `js/sync.js` este deja izolat, trebuie înlocuit doar transportul.
+2. **Sincronizarea operator ↔ client** între tab-uri din același browser folosește
+   `BroadcastChannel` + `localStorage` (fără server). **Pentru un telefon separat**
+   (alt dispozitiv / altă rețea) sincronizarea trece printr-un **relay WebSocket**
+   (`server/relay-server.js`, zero-dependențe) — configurat în Setări (`relayUrl` + `relayRoom`).
+   `js/sync.js` comută automat între cele 3 transporturi (BroadcastChannel, localStorage, relay).
 3. **Imaginile produselor** se stochează base64 în `localStorage` (limita ~5 MB).
    Aplicația redimensionează automat la 320 px/JPEG; pentru cataloage mari folosește emoji + culoare.
 4. **Bonul** este o chitanță informativă (HTML → print). Nu substituie integrarea cu o casă de marcat fiscală.

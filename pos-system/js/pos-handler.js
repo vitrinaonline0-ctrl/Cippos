@@ -43,6 +43,9 @@
   document.addEventListener('DOMContentLoaded', function () {
     Sync.init();
 
+    // Un ecran client nou conectat (telefon) cere cosul curent → il retrimitem
+    Sync.on(Sync.M.HELLO, function () { publishCart(); });
+
     App.init().then(function () {
       state.user = App.requireAuth('pos.sale');
       if (!state.user) return;

@@ -1,0 +1,13 @@
+{
+  "name": "pos-client-relay",
+  "version": "1.0.0",
+  "description": "Relay WebSocket zero-dependențe pentru sincronizarea ecranului operator cu ecranul client (POS System).",
+  "main": "relay-server.js",
+  "scripts": {
+    "start": "node relay-server.js"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "license": "MIT"
+}

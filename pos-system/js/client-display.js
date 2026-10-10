@@ -37,12 +37,23 @@
     setInterval(function () {
       var el = document.getElementById('connState');
       var fresh = lastMsg && (Date.now() - lastMsg < 8000);
-      el.classList.toggle('ok', !!fresh);
-      el.textContent = fresh ? '● conectat' : 'in asteptare…';
+      var r = (typeof Sync.relayStatus === 'function') ? Sync.relayStatus() : 'disabled';
+
+      if (r === 'open') {
+        el.classList.toggle('ok', true);
+        el.textContent = fresh ? '● conectat (relay)' : '● relay OK · astept comanda';
+      } else if (r === 'connecting') {
+        el.classList.toggle('ok', false);
+        el.textContent = '● reconectare relay…';
+      } else {
+        // Fara relay (doar BroadcastChannel/localStorage, acelasi browser)
+        el.classList.toggle('ok', !!fresh);
+        el.textContent = fresh ? '● conectat' : 'in asteptare…';
+      }
     }, 1000);
 
-    // Solicita operatorului sa retrimita cosul (daca e deschis in alt tab)
-    Sync.publish('client:hello', {});
+    // Solicita operatorului sa retrimita cosul (daca e deschis in alt tab / alt dispozitiv)
+    Sync.publish(Sync.M.HELLO, {});
   });
 
   /* ========================================================================

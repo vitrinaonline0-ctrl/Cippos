@@ -129,7 +129,10 @@
     stockAlertEnabled: true,
     stockAlertThreshold: 10,
     showClientDisplay: true,
-    lowStockNotifyRoles: ['admin', 'manager']
+    lowStockNotifyRoles: ['admin', 'manager'],
+    /* Sincronizare ecran client cross-dispozitiv (relay WebSocket) */
+    relayUrl: '',          // ex: wss://pos-relay-xyz.onrender.com — gol = doar acelasi browser
+    relayRoom: 'default'   // camera separata per magazin (evita amestecarea magazinelor)
   };
 
   /* ========================================================================

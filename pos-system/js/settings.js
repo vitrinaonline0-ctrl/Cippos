@@ -49,9 +49,35 @@
     set('setStockThreshold', s.stockAlertThreshold);
     document.getElementById('setStockAlert').checked = !!s.stockAlertEnabled;
     document.getElementById('setClientDisplay').checked = !!s.showClientDisplay;
+    set('setRelayUrl', s.relayUrl);
+    set('setRelayRoom', s.relayRoom || 'default');
+    bindRelayStatus();
+    updateRelayStatusLabel();
   }
 
   function set(id, v) { var el = document.getElementById(id); if (el) el.value = v; }
+
+  /* Status live + buton test pentru relay-ul de sincronizare cross-dispozitiv */
+  function updateRelayStatusLabel() {
+    var el = document.getElementById('relayStatus');
+    if (!el) return;
+    var st = (window.Sync && Sync.relayStatus) ? Sync.relayStatus() : 'disabled';
+    el.textContent = st === 'open' ? '● conectat' : st === 'connecting' ? '● reconectare…' : '○ oprit (fara relay)';
+    el.style.color = st === 'open' ? 'var(--success)' : (st === 'connecting' ? 'var(--warning)' : '');
+  }
+
+  function bindRelayStatus() {
+    if (window.Sync && Sync.onRelayStatus) Sync.onRelayStatus(function () { updateRelayStatusLabel(); });
+    var test = document.getElementById('btnTestRelay');
+    if (test) test.addEventListener('click', function () {
+      var url = document.getElementById('setRelayUrl').value.trim();
+      var room = document.getElementById('setRelayRoom').value.trim() || 'default';
+      if (!url) { U.toast('Introdu mai intai URL-ul relay-ului.', 'warning'); return; }
+      var st = Sync.configure(url, room);
+      U.toast('Relay: ' + (st === 'open' ? 'conectat' : st === 'connecting' ? 'se conecteaza…' : 'oprit'),
+        st === 'open' ? 'success' : 'warning');
+    });
+  }
 
   function bind(canEdit) {
     if (canEdit) {
@@ -100,10 +126,15 @@
       sessionTimeoutMin: tMin,
       stockAlertEnabled: document.getElementById('setStockAlert').checked,
       stockAlertThreshold: parseInt(document.getElementById('setStockThreshold').value, 10) || 0,
-      showClientDisplay: document.getElementById('setClientDisplay').checked
+      showClientDisplay: document.getElementById('setClientDisplay').checked,
+      relayUrl: document.getElementById('setRelayUrl').value.trim(),
+      relayRoom: document.getElementById('setRelayRoom').value.trim() || 'default'
     });
 
     App.Store.set(App.KEYS.settings, updated);
+
+    // Aplica relay-ul imediat (reconecteaza daca s-a schimbat URL-ul/camera)
+    if (window.Sync && Sync.configure) Sync.configure(updated.relayUrl, updated.relayRoom);
     App.log('settings.update', 'Setari sistem actualizate (TVA ' + vat + '%, moneda ' + updated.currency + ').');
     U.toast('Setarile au fost salvate.', 'success');
     App.renderHeader('settings.html');

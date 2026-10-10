@@ -92,6 +92,26 @@
       <!-- ---------- Coloana dreapta ---------- -->
       <div>
         <div class="card">
+          <div class="card-title"><h3>🌐 Ecran client pe telefon (alt dispozitiv)</h3><span class="hint">necesita un relay WebSocket</span></div>
+          <p class="small muted">Pentru a trimite produsele de pe laptopul operator pe telefonul client (retele diferite),
+            seteaza aici adresa serverului relay și o cameră unică pe magazin.</p>
+          <div class="field">
+            <label for="setRelayUrl">URL relay (wss://…)</label>
+            <input class="input" id="setRelayUrl" maxlength="200" placeholder="wss://pos-relay-xyz.onrender.com" autocapitalize="none" spellcheck="false">
+          </div>
+          <div class="field">
+            <label for="setRelayRoom">Camera (ID magazin)</label>
+            <input class="input" id="setRelayRoom" maxlength="64" placeholder="magazin-1" autocapitalize="none" spellcheck="false">
+          </div>
+          <div class="spread mt-2">
+            <button class="btn btn-outline btn-sm" id="btnTestRelay" type="button">🔌 Testeaza conexiunea</button>
+            <span id="relayStatus" class="small muted">—</span>
+          </div>
+          <p class="small muted mt-2">Lasă URL-ul gol pentru sincronizare doar între tab-uri din același browser.
+            Cum găzduiești relay-ul: vezi <code>server/README.md</code> (gratuit pe Render / Railway / Fly).</p>
+        </div>
+
+        <div class="card">
           <div class="card-title"><h3>💾 Backup &amp; restaurare</h3></div>
           <p class="small muted">Datele sunt salvate local in browser (localStorage) si dublate automat in IndexedDB.
              Fa un backup inainte de schimbari majore sau de mutarea pe alt dispozitiv.</p>
