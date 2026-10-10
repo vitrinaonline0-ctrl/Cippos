@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2c3e50">
+  <title>POS System — Gestiune produse</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%232c3e50'/><text x='50%25' y='58%25' font-size='18' text-anchor='middle' fill='%2327ae60'>₺</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <header class="app-header" id="appHeader"></header>
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1>📦 Gestiune produse</h1>
+        <p>Adauga, modifica, importa si monitorizeaza stocul produselor vandute.</p>
+      </div>
+      <div class="page-head-actions">
+        <button class="btn btn-outline" id="btnCategories">🏷 Categorii</button>
+        <button class="btn btn-outline" id="btnImportCsv" data-requires-edit>⬆ Import CSV</button>
+        <button class="btn btn-outline" id="btnExportCsv">⬇ Export CSV</button>
+        <button class="btn btn-success" id="btnNewProduct" data-requires-edit>+ Produs nou</button>
+      </div>
+    </div>
+
+    <!-- KPI -->
+    <div class="kpi-grid">
+      <div class="kpi blue"><div class="kpi-label">Produse active</div><div class="kpi-value" id="statCount">0</div></div>
+      <div class="kpi green"><div class="kpi-label">Valoare stoc</div><div class="kpi-value" id="statValue">0,00 RON</div><div class="kpi-sub">pret × cantitate</div></div>
+      <div class="kpi orange"><div class="kpi-label">Sub stoc minim</div><div class="kpi-value" id="statLow">0</div><div class="kpi-sub">necesita aprovizionare</div></div>
+    </div>
+
+    <!-- Filtre -->
+    <div class="filters-bar">
+      <div class="field grow">
+        <label for="pSearch">Cautare</label>
+        <input class="input" id="pSearch" type="search" placeholder="Nume, SKU sau cod de bare…">
+      </div>
+      <div class="field">
+        <label for="pCategory">Categorie</label>
+        <select class="select" id="pCategory"><option value="all">Toate categoriile</option></select>
+      </div>
+      <div class="field">
+        <label class="checkbox" style="min-height:44px"><input type="checkbox" id="pOnlyLow"> Doar stoc scazut</label>
+      </div>
+    </div>
+
+    <!-- Tabel produse -->
+    <div class="table-wrap">
+      <table class="data">
+        <thead>
+          <tr>
+            <th>ID</th><th>Produs</th><th>Cod bare</th><th class="num">Pret</th>
+            <th class="num">Stoc</th><th>Categorie</th><th>Status</th><th class="actions">Actiuni</th>
+          </tr>
+        </thead>
+        <tbody id="pBody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- ================= MODAL: PRODUS ================= -->
+  <div class="modal-backdrop" id="prodModal">
+    <div class="modal wide">
+      <div class="modal-head"><h3 id="prodFormTitle">Produs nou</h3><button class="close-x" data-close="prodModal">×</button></div>
+      <form id="prodForm">
+        <div class="modal-body">
+          <div class="field">
+            <label for="prodName">Denumire produs *</label>
+            <input class="input" id="prodName" required maxlength="120" placeholder="ex: Cappuccino mediu">
+            <div class="field-error" id="prodNameErr"></div>
+          </div>
+
+          <div class="field-row-3">
+            <div class="field">
+              <label for="prodSku">SKU / cod intern</label>
+              <input class="input" id="prodSku" maxlength="40" placeholder="CAF-002">
+            </div>
+            <div class="field">
+              <label for="prodBarcode">Cod de bare</label>
+              <input class="input" id="prodBarcode" maxlength="30" placeholder="5941234000028">
+            </div>
+            <div class="field">
+              <label for="prodUnit">Unitate masura</label>
+              <select class="select" id="prodUnit">
+                <option value="buc">buc</option><option value="kg">kg</option>
+                <option value="g">g</option><option value="l">l</option><option value="ml">ml</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field-row-3">
+            <div class="field">
+              <label for="prodPrice">Pret *</label>
+              <input class="input" id="prodPrice" type="number" step="0.01" min="0" required placeholder="0.00">
+              <div class="field-error" id="prodPriceErr"></div>
+            </div>
+            <div class="field">
+              <label for="prodStock">Stoc *</label>
+              <input class="input" id="prodStock" type="number" step="0.001" min="0" required placeholder="0">
+              <div class="field-error" id="prodStockErr"></div>
+            </div>
+            <div class="field">
+              <label for="prodMinStock">Stoc minim (alerta)</label>
+              <input class="input" id="prodMinStock" type="number" step="1" min="0" placeholder="10">
+              <div class="field-error" id="prodMinStockErr"></div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="prodCategory">Categorie</label>
+            <select class="select" id="prodCategory"></select>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="prodEmoji">Emoji (fara imagine)</label>
+              <input class="input" id="prodEmoji" maxlength="4" placeholder="☕">
+            </div>
+            <div class="field">
+              <label for="prodColor">Culoare fundal</label>
+              <input class="input" id="prodColor" type="color" value="#2c3e50" style="padding:4px;height:44px">
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="prodImage">Imagine produs (JPG/PNG, redimensionata automat la 320px)</label>
+            <input class="input" id="prodImage" type="file" accept="image/*">
+            <div class="mt-2" id="imgPreview"></div>
+            <button type="button" class="btn btn-sm btn-outline mt-2" id="btnRemoveImage">Elimina imaginea</button>
+          </div>
+
+          <label class="checkbox"><input type="checkbox" id="prodActive" checked> Produs activ (vizibil la vanzare)</label>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-outline" data-close="prodModal">Anuleaza</button>
+          <button type="submit" class="btn btn-success">Salveaza produsul</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: CATEGORII ================= -->
+  <div class="modal-backdrop" id="catModal">
+    <div class="modal">
+      <div class="modal-head"><h3>🏷 Categorii</h3><button class="close-x" data-close="catModal">×</button></div>
+      <div class="modal-body">
+        <div id="catList"></div>
+        <div class="divider"></div>
+        <div class="row">
+          <input class="input grow" id="newCatName" placeholder="Nume categorie noua">
+          <button class="btn btn-success" id="btnAddCategory">Adauga</button>
+        </div>
+      </div>
+      <div class="modal-foot"><button class="btn btn-outline" data-close="catModal">Inchide</button></div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: IMPORT CSV ================= -->
+  <div class="modal-backdrop" id="importModal">
+    <div class="modal wide">
+      <div class="modal-head"><h3>⬆ Import produse din CSV</h3><button class="close-x" data-close="importModal">×</button></div>
+      <div class="modal-body">
+        <p class="small muted">Coloane acceptate: <code>sku, barcode, name, price, category, stock, minStock, unit</code>.
+           Daca SKU-ul exista, produsul este actualizat; altfel se creeaza unul nou.
+           Categoria se creeaza automat daca nu exista.</p>
+
+        <div class="row mb-4">
+          <input class="input grow" type="file" id="csvFile" accept=".csv,text/csv">
+          <button class="btn btn-outline" id="btnDownloadTemplate">Descarca sablon</button>
+        </div>
+
+        <div class="field">
+          <label for="csvText">…sau lipeste continutul CSV aici</label>
+          <textarea class="textarea" id="csvText" rows="5" placeholder="sku,barcode,name,price,..."></textarea>
+        </div>
+
+        <div id="csvPreview"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-outline" data-close="importModal">Anuleaza</button>
+        <button class="btn btn-success" id="btnRunImport">Importa datele</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastHost"></div>
+
+  <script src="js/db.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/products.js"></script>
+</body>
+</html>

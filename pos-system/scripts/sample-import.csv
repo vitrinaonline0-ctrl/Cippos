@@ -1,0 +1,7 @@
+sku,barcode,name,price,category,stock,minStock,unit
+CAF-100,5941234000301,Latte mare,15.90,Cafea,999,20,buc
+CAF-101,5941234000302,Cafea decofeinizata,9.90,Cafea,999,20,buc
+PAT-100,5941234000303,Baghetă cu unt,5.50,Patiserie,40,10,buc
+PAT-101,5941234000304,Cozonac felii 200g,16.00,Patiserie,12,5,buc
+BAU-100,5941234000305,Limonadă 0.4L,11.00,Băuturi,50,20,buc
+SNC-100,5941234000306,Biscuiți digestivi,7.30,Snacks,60,20,buc

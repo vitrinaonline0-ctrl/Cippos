@@ -1,0 +1,48 @@
+# ============================================================
+# Configurare Netlify - sistem POS static (fara build step)
+# ============================================================
+
+[build]
+  publish = "."
+  command = ""
+
+# Cache pentru fisierele statice (performanta < 2s la reincarcare)
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/data/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+# Service Worker NU se cache-uieza agresiv (trebuie sa poata fi actualizat)
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+# Securitate
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Redirecturi prietenoase (extensia .html este optionala)
+[[redirects]]
+  from = "/login"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/client"
+  to = "/client-display.html"
+  status = 200

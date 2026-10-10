@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=540, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2c3e50">
+  <title>Ecran client — POS System</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <style>
+    /* Pagina e optimizata pentru ecran vertical 540x960 (telefon montat la casa) */
+    body { background:#1b2631; }
+  </style>
+</head>
+<body class="client-body">
+
+  <div class="client-shell">
+
+    <div id="connState" class="client-conn">in asteptare</div>
+
+    <!-- Antet -->
+    <header class="client-head">
+      <div class="brandline">Bine ati venit la</div>
+      <div class="co" id="cCompany">Magazinul Central SRL</div>
+      <div class="op" id="cOperator">Operator: —</div>
+    </header>
+
+    <!-- Lista produse -->
+    <main class="client-items" id="cItems">
+      <div class="client-waiting">
+        <span class="big">🛒</span>
+        <p>Se pregateste comanda…<br>
+        <span class="small">Produsele vor aparea aici pe masura ce sunt scanate.</span></p>
+      </div>
+    </main>
+
+    <!-- Totaluri -->
+    <footer class="client-totals">
+      <div class="client-trow"><span>Subtotal</span><span id="cSubtotal">0,00 RON</span></div>
+      <div class="client-trow disc" id="cDiscRow" style="display:none"><span>Discount</span><span id="cDiscount">− 0,00 RON</span></div>
+      <div class="client-trow"><span id="cVatLabel">TVA 19%</span><span id="cVat">0,00 RON</span></div>
+      <div class="client-trow grand"><span>TOTAL</span><span id="cTotal">0,00 RON</span></div>
+      <div class="client-pay-line" id="cPay">💵 Plata: Numerar</div>
+    </footer>
+  </div>
+
+  <!-- Ecran "Multumim!" dupa plata -->
+  <div class="thanks-screen" id="thanksScreen">
+    <div class="check">✓</div>
+    <h1>Multumim!</h1>
+    <p>Plata a fost procesata cu succes.</p>
+    <div class="tot" id="tThanksTotal">0,00 RON</div>
+    <div class="receipt-no" id="tReceiptNo">CH-000000-0000</div>
+    <div class="hint" id="tThanksHint">Va mai asteptam cu drag! 🎉</div>
+  </div>
+
+  <script src="js/db.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/client-display.js"></script>
+</body>
+</html>

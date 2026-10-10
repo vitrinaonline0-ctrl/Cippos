@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2c3e50">
+  <title>POS System — Gestiune operatori</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%232c3e50'/><text x='50%25' y='58%25' font-size='18' text-anchor='middle' fill='%2327ae60'>₺</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <header class="app-header" id="appHeader"></header>
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1>👥 Gestiune operatori</h1>
+        <p>Conturi de acces, roluri si permisiuni. Parolele sunt stocate doar ca hash SHA-256 cu salt.</p>
+      </div>
+      <div class="page-head-actions">
+        <button class="btn btn-outline" id="btnExportOperators">⬇ Export CSV</button>
+        <button class="btn btn-success" id="btnNewOperator" data-manage>+ Operator nou</button>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi blue"><div class="kpi-label">Total conturi</div><div class="kpi-value" id="statTotal">0</div></div>
+      <div class="kpi green"><div class="kpi-label">Conturi active</div><div class="kpi-value" id="statActive">0</div></div>
+      <div class="kpi orange"><div class="kpi-label">Sesiuni deschise</div><div class="kpi-value" id="statOnline">0</div><div class="kpi-sub">pe acest dispozitiv</div></div>
+    </div>
+
+    <div class="filters-bar">
+      <div class="field grow">
+        <label for="oSearch">Cautare</label>
+        <input class="input" id="oSearch" type="search" placeholder="Nume, utilizator sau email…">
+      </div>
+      <div class="field">
+        <label for="oRole">Rol</label>
+        <select class="select" id="oRole">
+          <option value="all">Toate rolurile</option>
+          <option value="admin">Administrator</option>
+          <option value="manager">Manager</option>
+          <option value="operator">Operator</option>
+          <option value="viewer">Vizualizare</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data">
+        <thead>
+          <tr><th>Nume</th><th>Email</th><th>Rol</th><th>Ultima logare</th><th>Status</th><th>Creat</th><th class="actions">Actiuni</th></tr>
+        </thead>
+        <tbody id="oBody"></tbody>
+      </table>
+    </div>
+
+    <div class="card mt-6">
+      <div class="card-title"><h3>🔐 Matrice de permisiuni pe roluri</h3><span class="hint">definita in <code>js/app.js → ROLE_PERMS</code></span></div>
+      <div class="table-wrap">
+        <table class="data" id="permMatrix"></table>
+      </div>
+      <p class="small muted mt-4">
+        <b>Administrator</b> — acces total, inclusiv setari si conturi.
+        <b>Manager</b> — vanzari, produse, rapoarte si setari (fara gestiune conturi).
+        <b>Operator</b> — doar vanzare si consultarea produselor.
+        <b>Vizualizare</b> — doar rapoarte, fara drept de modificare.
+      </p>
+    </div>
+  </main>
+
+  <!-- ================= MODAL: OPERATOR ================= -->
+  <div class="modal-backdrop" id="opModal">
+    <div class="modal">
+      <div class="modal-head"><h3 id="opFormTitle">Operator nou</h3><button class="close-x" data-close="opModal">×</button></div>
+      <form id="opForm">
+        <div class="modal-body">
+          <div class="field">
+            <label for="opName">Nume complet *</label>
+            <input class="input" id="opName" required maxlength="80" placeholder="ex: Maria Popescu">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="opUsername">Utilizator *</label>
+              <input class="input" id="opUsername" required maxlength="30" placeholder="maria" autocapitalize="none">
+            </div>
+            <div class="field">
+              <label for="opEmail">Email</label>
+              <input class="input" id="opEmail" type="email" maxlength="80" placeholder="maria@magazin.ro">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="opRole">Rol</label>
+              <select class="select" id="opRole"></select>
+            </div>
+            <div class="field">
+              <label for="opPhone">Telefon</label>
+              <input class="input" id="opPhone" maxlength="20" placeholder="07xx xxx xxx">
+            </div>
+          </div>
+
+          <div id="opPassRow">
+            <div class="field-row">
+              <div class="field">
+                <label for="opPassword">Parola *</label>
+                <input class="input" id="opPassword" type="text" autocomplete="off" placeholder="minim 6 caractere">
+              </div>
+              <div class="field">
+                <label for="opPassword2">Repeta parola *</label>
+                <input class="input" id="opPassword2" type="text" autocomplete="off">
+              </div>
+            </div>
+            <p class="small muted">Parola nu este stocata in clar — se salveaza doar hash-ul SHA-256 cu salt aleator.</p>
+          </div>
+
+          <label class="checkbox mt-2"><input type="checkbox" id="opActive" checked> Cont activ</label>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-outline" data-close="opModal">Anuleaza</button>
+          <button type="submit" class="btn btn-success">Salveaza</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toastHost"></div>
+
+  <script src="js/db.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/operators.js"></script>
+</body>
+</html>

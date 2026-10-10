@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2c3e50">
+  <title>POS System — Rapoarte &amp; analitica</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%232c3e50'/><text x='50%25' y='58%25' font-size='18' text-anchor='middle' fill='%2327ae60'>₺</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <header class="app-header" id="appHeader"></header>
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1>📊 Rapoarte &amp; analitica</h1>
+        <p>Vanzari, performanta operatorilor si situatia stocului — exportabile CSV sau PDF.</p>
+      </div>
+    </div>
+
+    <!-- Filtre de perioada (valabile pentru toate rapoartele) -->
+    <div class="filters-bar no-print">
+      <div class="field">
+        <label for="dateFrom">De la</label>
+        <input class="input" id="dateFrom" type="date">
+      </div>
+      <div class="field">
+        <label for="dateTo">Pana la</label>
+        <input class="input" id="dateTo" type="date">
+      </div>
+      <button class="btn" id="btnApplyPeriod">Aplica</button>
+      <button class="btn btn-outline" id="btnToday">Azi</button>
+      <button class="btn btn-outline" id="btnLast7">Ultimele 7 zile</button>
+      <button class="btn btn-outline" id="btnLast30">Ultimele 30 zile</button>
+      <button class="btn btn-outline" id="btnThisMonth">Luna curenta</button>
+    </div>
+
+    <div class="tabs no-print">
+      <button class="tab active" data-tab="dashboard">📈 Dashboard</button>
+      <button class="tab" data-tab="day">📅 Raport zi</button>
+      <button class="tab" data-tab="period">🗓 Perioada</button>
+      <button class="tab" data-tab="operator">👥 Operatori</button>
+      <button class="tab" data-tab="stock">📦 Stoc</button>
+    </div>
+
+    <!-- ================== DASHBOARD ================== -->
+    <section class="tab-panel active" id="panel-dashboard">
+      <div class="kpi-grid">
+        <div class="kpi green"><div class="kpi-label">Vanzari luna curenta</div><div class="kpi-value" id="kpiMonthSales">0</div><div class="kpi-sub" id="kpiMonthRange"></div></div>
+        <div class="kpi blue"><div class="kpi-label">Tranzactii</div><div class="kpi-value" id="kpiMonthTx">0</div><div class="kpi-sub">bonuri emise</div></div>
+        <div class="kpi"><div class="kpi-label">Clienti serviti</div><div class="kpi-value" id="kpiClients">0</div><div class="kpi-sub">luna curenta</div></div>
+        <div class="kpi red"><div class="kpi-label">Rata comenzi anulate</div><div class="kpi-value" id="kpiFail">0%</div><div class="kpi-sub">anulate / total</div></div>
+        <div class="kpi orange"><div class="kpi-label">Medie cos</div><div class="kpi-value" id="kpiAvg">0</div></div>
+        <div class="kpi"><div class="kpi-label">Produse vandute</div><div class="kpi-value" id="kpiItems">0</div></div>
+        <div class="kpi blue"><div class="kpi-label">TVA colectata</div><div class="kpi-value" id="kpiVat">0</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><h3>Vanzari zilnice — luna curenta</h3></div>
+        <div class="chart-wrap" id="chartMonth"></div>
+      </div>
+
+      <div class="settings-grid mt-4">
+        <div class="card">
+          <div class="card-title"><h3>Top 10 produse (luna)</h3></div>
+          <div id="topMonth"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><h3>Metode de plata (luna)</h3></div>
+          <div id="payMonth"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================== RAPORT ZI ================== -->
+    <section class="tab-panel" id="panel-day">
+      <div id="dayReport">
+        <div class="spread mb-4">
+          <h2>Raport zilnic — <span id="dayDate"></span></h2>
+          <div class="no-print">
+            <button class="btn btn-outline btn-sm" id="btnCsvDay" data-export>⬇ CSV</button>
+            <button class="btn btn-info btn-sm" id="btnPdfDay" data-export>🖨 PDF</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi green"><div class="kpi-label">Vanzari</div><div class="kpi-value" id="daySales">0</div></div>
+          <div class="kpi blue"><div class="kpi-label">Numar tranzactii</div><div class="kpi-value" id="dayTx">0</div></div>
+          <div class="kpi orange"><div class="kpi-label">Medie cos</div><div class="kpi-value" id="dayAvg">0</div></div>
+          <div class="kpi"><div class="kpi-label">TVA</div><div class="kpi-value" id="dayVat">0</div></div>
+          <div class="kpi"><div class="kpi-label">Produse vandute</div><div class="kpi-value" id="dayItems">0</div></div>
+          <div class="kpi red"><div class="kpi-label">Discounturi</div><div class="kpi-value" id="dayDisc">0</div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><h3>Vanzari pe ore de lucru</h3></div>
+          <div class="chart-wrap" id="dayChart"></div>
+        </div>
+
+        <div class="settings-grid mt-4">
+          <div class="card"><div class="card-title"><h3>Top 10 produse azi</h3></div><div id="dayTop"></div></div>
+          <div class="card"><div class="card-title"><h3>Metode de plata azi</h3></div><div id="dayPay"></div></div>
+        </div>
+
+        <div class="card mt-4">
+          <div class="card-title"><h3>Tranzactii (ultimele 60)</h3></div>
+          <div class="table-wrap">
+            <table class="data">
+              <thead><tr><th>Chitanta</th><th>Ora</th><th>Operator</th><th class="num">Produse</th><th>Plata</th><th class="num">Total</th></tr></thead>
+              <tbody id="dayOrders"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================== RAPORT PERIOADA ================== -->
+    <section class="tab-panel" id="panel-period">
+      <div id="periodReport">
+        <div class="spread mb-4">
+          <h2>Raport perioada — <span id="perRange"></span></h2>
+          <div class="no-print">
+            <select class="select" id="chartType" style="display:inline-block;width:auto;min-height:34px;padding:0 10px">
+              <option value="bar">Grafic bare</option>
+              <option value="line">Grafic linie</option>
+            </select>
+            <button class="btn btn-outline btn-sm" id="btnCsvPeriod" data-export>⬇ CSV</button>
+            <button class="btn btn-info btn-sm" id="btnPdfPeriod" data-export>🖨 PDF</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi green"><div class="kpi-label">Vanzari totale</div><div class="kpi-value" id="perSales">0</div></div>
+          <div class="kpi blue"><div class="kpi-label">Tranzactii</div><div class="kpi-value" id="perTx">0</div></div>
+          <div class="kpi orange"><div class="kpi-label">Medie cos</div><div class="kpi-value" id="perAvg">0</div></div>
+          <div class="kpi"><div class="kpi-label">TVA</div><div class="kpi-value" id="perVat">0</div></div>
+          <div class="kpi red"><div class="kpi-label">Discounturi</div><div class="kpi-value" id="perDisc">0</div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><h3>Evolutie vanzari</h3></div>
+          <div class="chart-wrap" id="periodChart"></div>
+        </div>
+
+        <div class="settings-grid mt-4">
+          <div class="card"><div class="card-title"><h3>Top 10 produse</h3></div><div id="periodTop"></div></div>
+          <div class="card"><div class="card-title"><h3>Metode de plata</h3></div><div id="periodPay"></div></div>
+        </div>
+
+        <div class="card mt-4">
+          <div class="card-title"><h3>Defalcare pe zile</h3></div>
+          <div class="table-wrap"><table class="data" id="periodTable"></table></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================== RAPORT OPERATOR ================== -->
+    <section class="tab-panel" id="panel-operator">
+      <div id="operatorReport">
+        <div class="spread mb-4">
+          <h2>Performanta operatori</h2>
+          <div class="no-print">
+            <button class="btn btn-outline btn-sm" id="btnCsvOperator" data-export>⬇ CSV</button>
+            <button class="btn btn-info btn-sm" id="btnPdfOperator" data-export>🖨 PDF</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><h3>Comparatie vanzari</h3></div>
+          <div class="chart-wrap" id="operatorChart"></div>
+        </div>
+        <div class="card mt-4">
+          <div class="card-title"><h3>Detalii pe operator</h3></div>
+          <div class="table-wrap"><table class="data" id="operatorTable"></table></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================== RAPORT STOC ================== -->
+    <section class="tab-panel" id="panel-stock">
+      <div id="stockReport">
+        <div class="spread mb-4">
+          <h2>Situatia stocului</h2>
+          <div class="no-print">
+            <button class="btn btn-outline btn-sm" id="btnCsvStock" data-export>⬇ CSV</button>
+            <button class="btn btn-info btn-sm" id="btnPdfStock" data-export>🖨 PDF</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi green"><div class="kpi-label">Valoare stoc total</div><div class="kpi-value" id="stockValue">0</div><div class="kpi-sub">pret × cantitate</div></div>
+          <div class="kpi blue"><div class="kpi-label">Unitati in stoc</div><div class="kpi-value" id="stockUnits">0</div></div>
+          <div class="kpi orange"><div class="kpi-label">Sub stoc minim</div><div class="kpi-value" id="stockLow">0</div></div>
+          <div class="kpi red"><div class="kpi-label">Stoc epuizat</div><div class="kpi-value" id="stockOut">0</div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><h3>Produse sub stocul minim</h3><span class="hint">prag din Setari</span></div>
+          <div class="table-wrap"><table class="data" id="lowStockTable"></table></div>
+        </div>
+
+        <div class="card mt-4">
+          <div class="card-title"><h3>Valoare stoc pe categorii</h3></div>
+          <div class="table-wrap"><table class="data" id="stockCatTable"></table></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toastHost"></div>
+  <div id="printArea"></div>
+
+  <script src="js/db.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/reports.js"></script>
+</body>
+</html>

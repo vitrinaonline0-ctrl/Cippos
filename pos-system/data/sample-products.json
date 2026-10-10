@@ -1,0 +1,150 @@
+{
+  "categories": [
+    { "id": "cat-cafea", "name": "Cafea" },
+    { "id": "cat-patiserie", "name": "Patiserie" },
+    { "id": "cat-bauturi", "name": "Băuturi" },
+    { "id": "cat-snacks", "name": "Snacks" },
+    { "id": "cat-lactate", "name": "Lactate" },
+    { "id": "cat-fructe", "name": "Fructe & Legume" },
+    { "id": "cat-igiena", "name": "Igiena" }
+  ],
+  "products": [
+    {
+      "id": "p001", "sku": "CAF-001", "barcode": "5941234000011",
+      "name": "Espresso scurt", "price": 8.40, "category": "cat-cafea",
+      "stock": 999, "minStock": 20, "unit": "buc", "emoji": "☕", "color": "#6f4e37",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p002", "sku": "CAF-002", "barcode": "5941234000028",
+      "name": "Cappuccino mediu", "price": 12.60, "category": "cat-cafea",
+      "stock": 999, "minStock": 20, "unit": "buc", "emoji": "🥛", "color": "#a9744f",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p003", "sku": "CAF-003", "barcode": "5941234000035",
+      "name": "Cafea cu lapte mare", "price": 14.00, "category": "cat-cafea",
+      "stock": 999, "minStock": 20, "unit": "buc", "emoji": "☕", "color": "#8d6e63",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p004", "sku": "CAF-004", "barcode": "5941234000042",
+      "name": "Ceai negru", "price": 7.50, "category": "cat-cafea",
+      "stock": 18, "minStock": 20, "unit": "buc", "emoji": "🍵", "color": "#5d4037",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p005", "sku": "PAT-001", "barcode": "5941234000059",
+      "name": "Croissant unt", "price": 9.90, "category": "cat-patiserie",
+      "stock": 45, "minStock": 15, "unit": "buc", "emoji": "🥐", "color": "#e6b34a",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p006", "sku": "PAT-002", "barcode": "5941234000066",
+      "name": "Pretzel cu sare", "price": 6.50, "category": "cat-patiserie",
+      "stock": 32, "minStock": 15, "unit": "buc", "emoji": "🥨", "color": "#c98a3d",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p007", "sku": "PAT-003", "barcode": "5941234000073",
+      "name": "Melc cu ciocolată", "price": 11.20, "category": "cat-patiserie",
+      "stock": 8, "minStock": 15, "unit": "buc", "emoji": "🍫", "color": "#7b4b2a",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p008", "sku": "PAT-004", "barcode": "5941234000080",
+      "name": "Sandwich pui", "price": 18.50, "category": "cat-patiserie",
+      "stock": 24, "minStock": 10, "unit": "buc", "emoji": "🥪", "color": "#d9a05b",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p009", "sku": "BAU-001", "barcode": "5941234000097",
+      "name": "Apă plată 0.5L", "price": 4.50, "category": "cat-bauturi",
+      "stock": 120, "minStock": 40, "unit": "buc", "emoji": "💧", "color": "#4aa3df",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p010", "sku": "BAU-002", "barcode": "5941234000103",
+      "name": "Apă minerală 0.5L", "price": 4.80, "category": "cat-bauturi",
+      "stock": 96, "minStock": 40, "unit": "buc", "emoji": "🫧", "color": "#5dade2",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p011", "sku": "BAU-003", "barcode": "5941234000110",
+      "name": "Cola 0.33L", "price": 8.00, "category": "cat-bauturi",
+      "stock": 64, "minStock": 30, "unit": "buc", "emoji": "🥤", "color": "#c0392b",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p012", "sku": "BAU-004", "barcode": "5941234000127",
+      "name": "Suc de portocale 0.33L", "price": 9.50, "category": "cat-bauturi",
+      "stock": 41, "minStock": 30, "unit": "buc", "emoji": "🍊", "color": "#e67e22",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p013", "sku": "SNC-001", "barcode": "5941234000134",
+      "name": "Ciocolată lapte 90g", "price": 6.90, "category": "cat-snacks",
+      "stock": 55, "minStock": 25, "unit": "buc", "emoji": "🍫", "color": "#8e5a34",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p014", "sku": "SNC-002", "barcode": "5941234000141",
+      "name": "Alune sărate 100g", "price": 7.80, "category": "cat-snacks",
+      "stock": 38, "minStock": 20, "unit": "buc", "emoji": "🥜", "color": "#b7884f",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p015", "sku": "SNC-003", "barcode": "5941234000158",
+      "name": "Chipsuri simple 150g", "price": 10.50, "category": "cat-snacks",
+      "stock": 12, "minStock": 20, "unit": "buc", "emoji": "🍟", "color": "#f1c40f",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p016", "sku": "LAC-001", "barcode": "5941234000165",
+      "name": "Iaurt natural 200g", "price": 5.20, "category": "cat-lactate",
+      "stock": 30, "minStock": 15, "unit": "buc", "emoji": "🥛", "color": "#ecf0f1",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p017", "sku": "LAC-002", "barcode": "5941234000172",
+      "name": "Brânză telemea 100g", "price": 8.75, "category": "cat-lactate",
+      "stock": 22, "minStock": 10, "unit": "kg", "emoji": "🧀", "color": "#f4d03f",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p018", "sku": "FRU-001", "barcode": "5941234000189",
+      "name": "Banane", "price": 7.99, "category": "cat-fructe",
+      "stock": 60, "minStock": 20, "unit": "kg", "emoji": "🍌", "color": "#f7dc6f",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p019", "sku": "FRU-002", "barcode": "5941234000196",
+      "name": "Mere roșii", "price": 6.49, "category": "cat-fructe",
+      "stock": 48, "minStock": 20, "unit": "kg", "emoji": "🍎", "color": "#e74c3c",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p020", "sku": "FRU-003", "barcode": "5941234000202",
+      "name": "Roșii cherry 250g", "price": 12.90, "category": "cat-fructe",
+      "stock": 5, "minStock": 10, "unit": "buc", "emoji": "🍅", "color": "#d35400",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p021", "sku": "IGI-001", "barcode": "5941234000219",
+      "name": "Șervețele umede 20buc", "price": 6.20, "category": "cat-igiena",
+      "stock": 26, "minStock": 12, "unit": "buc", "emoji": "🧻", "color": "#85c1e9",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    },
+    {
+      "id": "p022", "sku": "IGI-002", "barcode": "5941234000226",
+      "name": "Gel antibacterian 250ml", "price": 15.90, "category": "cat-igiena",
+      "stock": 14, "minStock": 8, "unit": "buc", "emoji": "🧴", "color": "#16a085",
+      "active": true, "createdAt": "2026-01-05T08:00:00.000Z"
+    }
+  ],
+  "vouchers": [
+    { "code": "BINE10", "type": "percent", "value": 10, "active": true, "description": "10% reducere bun venit" },
+    { "code": "FIDEL5", "type": "fixed", "value": 5, "active": true, "description": "5 lei reducere clienți fideli" },
+    { "code": "ANGAJAT20", "type": "percent", "value": 20, "active": true, "description": "Reducere angajați" }
+  ]
+}

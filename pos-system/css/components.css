@@ -1,0 +1,505 @@
+/* ==========================================================================
+   components.css — Componente specifice: login, POS (3 coloane), client display
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. PAGINA DE LOGIN
+   -------------------------------------------------------------------------- */
+.login-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  background: var(--primary);
+}
+
+.login-hero {
+  padding: var(--space-10);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(39, 174, 96, .28), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(41, 128, 185, .30), transparent 45%),
+    var(--primary);
+}
+.login-hero h1 { font-size: 40px; line-height: 1.1; margin-bottom: var(--space-4); }
+.login-hero p { font-size: var(--fs-md); opacity: .82; max-width: 46ch; }
+.login-features { display: grid; gap: var(--space-3); margin-top: var(--space-6); max-width: 420px; }
+.login-feature {
+  display: flex; gap: var(--space-3); align-items: flex-start;
+  background: rgba(255, 255, 255, .07);
+  border: 1px solid rgba(255, 255, 255, .12);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  font-size: var(--fs-sm);
+}
+.login-feature .ico { font-size: 20px; }
+
+.login-panel {
+  background: var(--surface);
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+}
+.login-card { width: 100%; max-width: 400px; }
+.login-card .logo {
+  width: 56px; height: 56px; border-radius: var(--radius);
+  background: var(--primary); color: #fff;
+  display: grid; place-items: center; font-size: 24px; margin-bottom: var(--space-4);
+}
+.login-card h2 { font-size: var(--fs-xl); }
+.login-card .sub { color: var(--text-muted); font-size: var(--fs-sm); margin-bottom: var(--space-5); }
+
+.demo-accounts {
+  margin-top: var(--space-5);
+  padding: var(--space-3);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  background: #fafbfc;
+}
+.demo-accounts h4 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .6px; color: var(--text-muted); margin-bottom: var(--space-2); }
+.demo-accounts button {
+  display: block; width: 100%; text-align: left;
+  padding: 7px var(--space-2);
+  background: #fff; border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: inherit; font-size: var(--fs-xs);
+  cursor: pointer; margin-bottom: 5px;
+  transition: all var(--transition);
+}
+.demo-accounts button:last-child { margin-bottom: 0; }
+.demo-accounts button:hover { border-color: var(--success); background: var(--success-soft); }
+.demo-accounts code { font-weight: 700; color: var(--primary); }
+
+.login-alert {
+  display: none;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  border: 1px solid #f5b7b1;
+  color: var(--danger-dark);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+}
+.login-alert.show { display: block; animation: toastIn 200ms ease-in-out; }
+
+/* --------------------------------------------------------------------------
+   2. ECRAN OPERATOR — grid 3 coloane (25% / 50% / 25%)
+   -------------------------------------------------------------------------- */
+.pos-shell { height: calc(100vh - var(--header-h)); display: flex; flex-direction: column; overflow: hidden; }
+
+.pos-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-3);
+  min-height: 0;
+}
+.pos-panel {
+  display: flex; flex-direction: column; gap: var(--space-3);
+  min-height: 0; overflow: hidden;
+}
+.pos-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  display: flex; flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.pos-card > .head {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);
+  padding: 10px var(--space-3);
+  border-bottom: 1px solid var(--border);
+  background: var(--primary-soft);
+  flex: none;
+}
+.pos-card > .head h3 { margin: 0; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: .5px; }
+.pos-card > .body { padding: var(--space-3); overflow-y: auto; min-height: 0; }
+.pos-card > .foot { padding: var(--space-3); border-top: 1px solid var(--border); background: #fafbfc; flex: none; }
+
+/* Cautare + scaner cod de bare */
+.scan-box { position: relative; }
+.scan-box .input { padding-left: 42px; font-size: var(--fs-lg); font-weight: 600; letter-spacing: .3px; }
+.scan-box .scan-ico {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  font-size: 18px; opacity: .55; pointer-events: none;
+}
+.scan-box.scanning .input { border-color: var(--success); box-shadow: 0 0 0 3px rgba(39,174,96,.18); }
+
+/* Rezultate cautare (dropdown) */
+.search-results {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: #fff; border: 1px solid var(--border-strong);
+  border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  max-height: 340px; overflow-y: auto; z-index: 40; display: none;
+}
+.search-results.show { display: block; }
+.search-item {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background var(--transition);
+}
+.search-item:last-child { border-bottom: none; }
+.search-item:hover, .search-item.selected { background: var(--success-soft); }
+.search-item .thumb {
+  width: 40px; height: 40px; border-radius: var(--radius-sm);
+  display: grid; place-items: center; font-size: 20px; flex: none; color: #fff;
+}
+.search-item .info { flex: 1; min-width: 0; }
+.search-item .info b { display: block; font-size: var(--fs-sm); }
+.search-item .info span { font-size: var(--fs-xs); color: var(--text-muted); }
+.search-item .price { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Chips categorii */
+.cat-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: var(--space-2); }
+.chip {
+  padding: 6px var(--space-3);
+  border: 1px solid var(--border-strong);
+  background: #fff; border-radius: 999px;
+  font-size: var(--fs-xs); font-weight: 700; cursor: pointer;
+  transition: all var(--transition);
+  font-family: inherit; color: var(--text);
+}
+.chip:hover { border-color: var(--primary); }
+.chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+/* Grid produse rapide (din categorie selectata) */
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: var(--space-2);
+}
+.quick-tile {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  padding: var(--space-2);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: inherit;
+  min-height: 88px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+}
+.quick-tile:hover { border-color: var(--success); background: var(--success-soft); transform: translateY(-2px); }
+.quick-tile:active { transform: scale(.97); }
+.quick-tile .ico {
+  width: 40px; height: 40px; border-radius: var(--radius-sm);
+  display: grid; place-items: center; font-size: 20px; color: #fff;
+}
+.quick-tile .nm { font-size: 10px; font-weight: 600; line-height: 1.2; max-height: 24px; overflow: hidden; }
+.quick-tile .pr { font-size: var(--fs-xs); font-weight: 700; color: var(--success-dark); }
+.quick-tile.out { opacity: .45; }
+.quick-tile .stockflag { font-size: 9px; color: var(--danger); font-weight: 700; }
+
+/* Istoric sesiune */
+.session-list li {
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: 8px var(--space-2);
+  border-bottom: 1px dashed var(--border);
+  font-size: var(--fs-xs);
+}
+.session-list li:last-child { border-bottom: none; }
+.session-list .no { font-weight: 700; color: var(--primary); }
+.session-list .amt { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* --------------------------------------------------------------------------
+   Cos de cumparaturi (panoul central)
+   -------------------------------------------------------------------------- */
+.cart-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.cart-table th {
+  font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .4px;
+  color: var(--text-muted); text-align: left; padding: 6px var(--space-2);
+  border-bottom: 2px solid var(--border);
+  position: sticky; top: 0; background: #fff; z-index: 1;
+}
+.cart-table td { padding: 8px var(--space-2); border-bottom: 1px solid var(--border); vertical-align: middle; }
+.cart-table tr:hover td { background: #fafcfe; }
+.cart-table .prod { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.cart-table .prod .ico {
+  width: 32px; height: 32px; border-radius: var(--radius-sm); flex: none;
+  display: grid; place-items: center; color: #fff; font-size: 16px;
+}
+.cart-table .prod b { display: block; font-size: var(--fs-sm); line-height: 1.2; }
+.cart-table .prod span { font-size: 10px; color: var(--text-muted); }
+.cart-table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.qty-ctrl { display: inline-flex; align-items: center; gap: 2px; }
+.qty-ctrl button {
+  width: 30px; height: 30px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong); background: #fff;
+  font-size: 16px; font-weight: 700; cursor: pointer; line-height: 1;
+  transition: all var(--transition); font-family: inherit;
+}
+.qty-ctrl button:hover { background: var(--primary-soft); border-color: var(--primary); }
+.qty-ctrl input {
+  width: 46px; height: 30px; text-align: center;
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  font-family: inherit; font-size: var(--fs-sm); font-weight: 700;
+}
+.icon-btn {
+  width: 30px; height: 30px; border-radius: var(--radius-sm);
+  border: 1px solid transparent; background: transparent; cursor: pointer;
+  color: var(--text-muted); font-size: 14px; transition: all var(--transition);
+}
+.icon-btn:hover { background: var(--danger-soft); color: var(--danger); }
+
+.cart-empty { text-align: center; padding: var(--space-8) var(--space-4); color: var(--text-muted); }
+.cart-empty .big { font-size: 46px; display: block; margin-bottom: var(--space-2); opacity: .4; }
+
+/* Zona discount + note */
+.totals-box { background: #fafbfc; border-top: 1px solid var(--border); padding: var(--space-3); flex: none; }
+.totals-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: var(--fs-sm); }
+.totals-row .v { font-variant-numeric: tabular-nums; font-weight: 600; }
+.totals-row.disc .v { color: var(--danger); }
+.totals-row.total {
+  border-top: 2px solid var(--border-strong);
+  margin-top: var(--space-2); padding-top: var(--space-3);
+  font-size: var(--fs-lg); font-weight: 800;
+}
+.totals-row.total .v { color: var(--success); font-size: var(--fs-xl); }
+
+.disc-tabs { display: flex; gap: 4px; margin-bottom: var(--space-2); }
+.disc-tabs button {
+  flex: 1; min-height: 34px; border: 1px solid var(--border-strong);
+  background: #fff; border-radius: var(--radius-sm); cursor: pointer;
+  font-family: inherit; font-size: var(--fs-xs); font-weight: 700;
+  transition: all var(--transition);
+}
+.disc-tabs button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+/* --------------------------------------------------------------------------
+   Panoul drept: plata
+   -------------------------------------------------------------------------- */
+.pay-methods { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+.pay-method {
+  min-height: 62px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font-family: inherit; font-size: var(--fs-xs); font-weight: 700;
+  transition: all var(--transition); color: var(--text);
+}
+.pay-method .ico { font-size: 20px; }
+.pay-method:hover { border-color: var(--primary-light); background: var(--primary-soft); }
+.pay-method.active { border-color: var(--success); background: var(--success-soft); color: var(--success-dark); }
+
+.mini-report { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+.mini-stat {
+  background: var(--primary-soft); border-radius: var(--radius-sm);
+  padding: var(--space-2); text-align: center;
+}
+.mini-stat .l { font-size: 9px; text-transform: uppercase; letter-spacing: .4px; color: var(--text-muted); font-weight: 700; }
+.mini-stat .v { font-size: var(--fs-md); font-weight: 800; font-variant-numeric: tabular-nums; }
+
+.action-stack { display: grid; gap: var(--space-2); }
+
+/* --------------------------------------------------------------------------
+   Modale
+   -------------------------------------------------------------------------- */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(30, 40, 52, .55);
+  display: none; place-items: center; padding: var(--space-4);
+  backdrop-filter: blur(2px);
+}
+.modal-backdrop.show { display: grid; animation: fadeIn 200ms ease-in-out; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+  background: #fff; border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%; max-width: 520px;
+  max-height: calc(100vh - 32px);
+  display: flex; flex-direction: column;
+  animation: modalIn 200ms ease-in-out;
+}
+.modal.wide { max-width: 760px; }
+@keyframes modalIn { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
+.modal-head {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+  padding: var(--space-4); border-bottom: 1px solid var(--border); flex: none;
+}
+.modal-head h3 { margin: 0; font-size: var(--fs-lg); }
+.modal-body { padding: var(--space-4); overflow-y: auto; }
+.modal-foot {
+  padding: var(--space-4); border-top: 1px solid var(--border);
+  display: flex; justify-content: flex-end; gap: var(--space-2); flex-wrap: wrap; flex: none;
+  background: #fafbfc; border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+.close-x {
+  width: 36px; height: 36px; border-radius: 50%; border: none; background: transparent;
+  font-size: 20px; cursor: pointer; color: var(--text-muted); transition: all var(--transition);
+}
+.close-x:hover { background: var(--danger-soft); color: var(--danger); }
+
+/* Modal plata */
+.pay-summary { background: var(--primary); color: #fff; border-radius: var(--radius); padding: var(--space-4); text-align: center; margin-bottom: var(--space-4); }
+.pay-summary .lbl { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 1px; opacity: .8; }
+.pay-summary .amt { font-size: 40px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); margin-top: var(--space-3); }
+.keypad button {
+  min-height: 52px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong); background: #fff;
+  font-size: var(--fs-lg); font-weight: 700; cursor: pointer;
+  font-family: inherit; transition: all var(--transition);
+}
+.keypad button:hover { background: var(--primary-soft); }
+.keypad button:active { transform: scale(.96); }
+
+/* --------------------------------------------------------------------------
+   3. ECRAN CLIENT (telefon 540x960)
+   -------------------------------------------------------------------------- */
+body.client-body { background: var(--primary); color: #fff; overflow: hidden; }
+
+.client-shell {
+  min-height: 100vh;
+  height: 100vh;
+  display: flex; flex-direction: column;
+  max-width: 540px; margin: 0 auto;
+  background: linear-gradient(180deg, #2c3e50 0%, #22303e 100%);
+}
+.client-head {
+  padding: var(--space-4);
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  flex: none;
+}
+.client-head .brandline { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 2px; opacity: .6; }
+.client-head .co { font-size: var(--fs-lg); font-weight: 700; }
+.client-head .op { font-size: var(--fs-xs); opacity: .7; margin-top: 2px; }
+
+.client-items { flex: 1; overflow-y: auto; padding: var(--space-3); min-height: 0; }
+.client-item {
+  display: flex; align-items: center; gap: var(--space-3);
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  margin-bottom: var(--space-2);
+  animation: slideUp 200ms ease-in-out;
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.client-item .pic {
+  width: 54px; height: 54px; border-radius: var(--radius-sm);
+  display: grid; place-items: center; font-size: 26px; flex: none; color: #fff;
+  background: rgba(255,255,255,.12);
+}
+.client-item .pic img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-sm); }
+.client-item .txt { flex: 1; min-width: 0; }
+.client-item .txt b { display: block; font-size: var(--fs-md); }
+.client-item .txt span { font-size: var(--fs-xs); opacity: .7; }
+.client-item .sum { text-align: right; white-space: nowrap; }
+.client-item .sum .p { font-size: var(--fs-lg); font-weight: 700; font-variant-numeric: tabular-nums; }
+.client-item .sum .q { font-size: var(--fs-xs); opacity: .7; }
+.client-item.removed { animation: fadeOut 200ms ease-in-out forwards; }
+@keyframes fadeOut { to { opacity: 0; transform: translateX(20px); height: 0; padding: 0; margin: 0; } }
+
+.client-waiting { text-align: center; padding: var(--space-10) var(--space-4); opacity: .75; }
+.client-waiting .big { font-size: 56px; display: block; margin-bottom: var(--space-4); animation: pulse 2s infinite; }
+
+.client-totals {
+  background: rgba(0,0,0,.25);
+  border-top: 1px solid rgba(255,255,255,.12);
+  padding: var(--space-4);
+  flex: none;
+}
+.client-trow { display: flex; justify-content: space-between; font-size: var(--fs-md); padding: 3px 0; opacity: .85; }
+.client-trow.disc { color: #ffb3aa; }
+.client-trow.grand {
+  border-top: 1px solid rgba(255,255,255,.2);
+  margin-top: var(--space-2); padding-top: var(--space-3);
+  font-size: 34px; font-weight: 800; opacity: 1; color: #2ecc71;
+  font-variant-numeric: tabular-nums;
+}
+.client-pay-line {
+  display: flex; align-items: center; justify-content: center; gap: var(--space-2);
+  margin-top: var(--space-2);
+  font-size: var(--fs-sm); font-weight: 700;
+  padding: 8px; border-radius: var(--radius-sm);
+  background: rgba(39,174,96,.2); color: #a9dfbf;
+}
+
+/* Mesaj multumim */
+.thanks-screen {
+  position: fixed; inset: 0; z-index: 500;
+  background: linear-gradient(160deg, #27ae60, #1e8449);
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: var(--space-6); color: #fff;
+}
+.thanks-screen.show { display: flex; animation: fadeIn 200ms ease-in-out; }
+.thanks-screen .check {
+  width: 120px; height: 120px; border-radius: 50%;
+  background: rgba(255,255,255,.18);
+  display: grid; place-items: center; font-size: 62px;
+  margin-bottom: var(--space-6);
+  animation: pop 300ms ease-in-out;
+}
+@keyframes pop { from { transform: scale(.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.thanks-screen h1 { font-size: 40px; margin-bottom: var(--space-2); }
+.thanks-screen .receipt-no {
+  background: rgba(0,0,0,.22); padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius); font-size: var(--fs-xl); font-weight: 800;
+  letter-spacing: 2px; margin-top: var(--space-4); font-variant-numeric: tabular-nums;
+}
+.thanks-screen .tot { font-size: 28px; font-weight: 700; margin-top: var(--space-4); }
+.thanks-screen .hint { margin-top: var(--space-6); font-size: var(--fs-sm); opacity: .8; }
+
+.client-conn {
+  position: absolute; top: var(--space-2); right: var(--space-2);
+  font-size: 10px; padding: 4px 8px; border-radius: 999px;
+  background: rgba(231,76,60,.85); font-weight: 700;
+}
+.client-conn.ok { background: rgba(39,174,96,.7); }
+
+/* --------------------------------------------------------------------------
+   4. RAPOARTE — grafice SVG + filtre
+   -------------------------------------------------------------------------- */
+.chart-wrap { width: 100%; overflow-x: auto; }
+.chart-wrap svg { display: block; width: 100%; height: auto; }
+.chart-legend { display: flex; gap: var(--space-4); flex-wrap: wrap; font-size: var(--fs-xs); margin-top: var(--space-2); }
+.chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.chart-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+.filters-bar {
+  display: flex; gap: var(--space-3); align-items: flex-end; flex-wrap: wrap;
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
+  padding: var(--space-3); margin-bottom: var(--space-4);
+}
+.filters-bar .field { margin-bottom: 0; min-width: 140px; }
+
+.tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: var(--space-4); overflow-x: auto; }
+.tab {
+  padding: var(--space-3) var(--space-4);
+  border: none; background: transparent; cursor: pointer;
+  font-family: inherit; font-size: var(--fs-sm); font-weight: 700; color: var(--text-muted);
+  border-bottom: 3px solid transparent; margin-bottom: -2px; white-space: nowrap;
+  transition: all var(--transition); min-height: var(--touch);
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--success); border-bottom-color: var(--success); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; animation: fadeIn 200ms ease-in-out; }
+
+/* --------------------------------------------------------------------------
+   5. SETARI
+   -------------------------------------------------------------------------- */
+.settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-4); align-items: start; }
+.log-list { max-height: 420px; overflow-y: auto; font-size: var(--fs-xs); }
+.log-row { display: grid; grid-template-columns: 130px 1fr; gap: var(--space-2); padding: 6px 0; border-bottom: 1px dashed var(--border); }
+.log-row .ts { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.log-row .who { font-weight: 700; color: var(--primary); }
+
+/* Bon fiscal (print) */
+.receipt-print { font-family: 'Consolas', monospace; font-size: 12px; max-width: 300px; margin: 0 auto; color: #000; }
+.receipt-print h4 { text-align: center; margin-bottom: 8px; }
+.receipt-print table { width: 100%; border-collapse: collapse; }
+.receipt-print td { padding: 1px 0; }
+.receipt-print .sep { border-top: 1px dashed #000; margin: 6px 0; }

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2c3e50">
+  <title>POS System — Vanzare</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%232c3e50'/><text x='50%25' y='58%25' font-size='18' text-anchor='middle' fill='%2327ae60'>₺</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <header class="app-header" id="appHeader"></header>
+
+  <div class="pos-shell">
+
+    <!-- Bara de alerta stoc minim -->
+    <div id="stockAlert" class="hidden" style="background:var(--warning-soft);color:#9c640c;padding:8px 16px;font-size:13px;font-weight:600;border-bottom:1px solid #f5cba7"></div>
+
+    <!-- ================= GRID 3 COLOANE (25% / 50% / 25%) ================= -->
+    <div class="pos-grid">
+
+      <!-- ========== PANOU STANGA (25%) : cautare, scaner, istoric ========== -->
+      <aside class="pos-panel">
+
+        <section class="pos-card" style="flex:0 0 auto">
+          <div class="head"><h3>Cautare &amp; scanare</h3><span class="small muted">F2 = plata</span></div>
+          <div class="body">
+            <div class="scan-box" id="scanBox">
+              <span class="scan-ico">🔎</span>
+              <input class="input" id="searchInput" type="text" autocomplete="off"
+                     placeholder="Scaneaza cod de bare sau cauta…" aria-label="Cautare produs">
+              <div class="search-results" id="searchResults"></div>
+            </div>
+            <p class="small muted mt-2">Tasteaza nume, SKU sau cod de bare. Cu scanerul hardware
+               produsul intra direct in cos dupa Enter.</p>
+            <div class="cat-chips" id="catChips"></div>
+          </div>
+        </section>
+
+        <section class="pos-card" style="flex:1 1 auto">
+          <div class="head"><h3>Produse</h3><span class="small muted">click pentru adaugare</span></div>
+          <div class="body"><div class="quick-grid" id="quickGrid"></div></div>
+        </section>
+
+        <section class="pos-card" style="flex:0 0 auto;max-height:30%">
+          <div class="head"><h3>Istoric sesiune</h3><span class="small muted">azi</span></div>
+          <div class="body"><ul class="session-list" id="sessionOrders"></ul></div>
+        </section>
+      </aside>
+
+      <!-- ========== PANOU CENTRU (50%) : cosul de cumparaturi ========== -->
+      <main class="pos-panel">
+        <section class="pos-card" style="flex:1 1 auto">
+          <div class="head">
+            <h3>🛒 Cos de cumparaturi</h3>
+            <div class="row">
+              <span class="badge badge-info" id="cartCount">0 produse</span>
+              <button class="btn btn-sm btn-outline" id="btnClearCart">Goleste</button>
+            </div>
+          </div>
+
+          <div class="body" style="padding:0">
+            <table class="cart-table">
+              <thead>
+                <tr>
+                  <th style="width:40%">Produs</th>
+                  <th style="width:18%">Cantitate</th>
+                  <th style="width:16%" class="num">Pret unit.</th>
+                  <th style="width:18%" class="num">Subtotal</th>
+                  <th style="width:8%"></th>
+                </tr>
+              </thead>
+              <tbody id="cartBody"></tbody>
+            </table>
+          </div>
+
+          <!-- Discounturi + note -->
+          <div class="body" style="border-top:1px solid var(--border);flex:0 0 auto">
+            <div class="disc-tabs">
+              <button class="active" data-pane="fixed">Discount fix</button>
+              <button data-pane="percent">Discount %</button>
+              <button data-pane="voucher">Voucher</button>
+            </div>
+
+            <div class="disc-pane" id="pane-fixed">
+              <div class="row">
+                <input class="input grow" id="discFixed" type="number" min="0" step="0.01" placeholder="Valoare in RON (ex: 10)">
+                <button class="btn btn-outline" id="btnApplyDiscount">Aplica</button>
+              </div>
+            </div>
+
+            <div class="disc-pane hidden" id="pane-percent">
+              <div class="row">
+                <input class="input grow" id="discPercent" type="number" min="1" max="100" step="1" placeholder="Procent (ex: 5)">
+                <button class="btn btn-outline" id="btnApplyDiscount2" onclick="document.getElementById('btnApplyDiscount').click()">Aplica</button>
+              </div>
+            </div>
+
+            <div class="disc-pane hidden" id="pane-voucher">
+              <div class="row">
+                <input class="input grow" id="discVoucher" type="text" placeholder="Cod voucher (ex: BINE10)" autocapitalize="characters">
+                <button class="btn btn-outline" id="btnApplyVoucher">Aplica</button>
+              </div>
+            </div>
+
+            <div class="row mt-2">
+              <button class="btn btn-sm btn-ghost" id="btnClearDiscount">✕ Elimina discountul</button>
+            </div>
+
+            <div class="field mt-2" style="margin-bottom:0">
+              <label for="orderNote">Nota comanda</label>
+              <textarea class="textarea" id="orderNote" rows="2" placeholder="Ex: clientul doreste bon fiscal pe firma…" style="min-height:60px"></textarea>
+            </div>
+          </div>
+
+          <!-- Totaluri -->
+          <div class="totals-box">
+            <div class="totals-row"><span>Subtotal</span><span class="v" id="tSubtotal">0,00 RON</span></div>
+            <div class="totals-row disc"><span>Discount</span><span class="v" id="tDiscount">− 0,00 RON</span></div>
+            <div class="totals-row"><span id="tVatLabel">TVA 19%</span><span class="v" id="tVat">0,00 RON</span></div>
+            <div class="totals-row total"><span>TOTAL DE PLATA</span><span class="v" id="tTotal">0,00 RON</span></div>
+          </div>
+        </section>
+      </main>
+
+      <!-- ========== PANOU DREAPTA (25%) : operator, plata, mini-raport ========== -->
+      <aside class="pos-panel">
+
+        <section class="pos-card" style="flex:0 0 auto">
+          <div class="head"><h3>Operator</h3></div>
+          <div class="body" id="opCard"></div>
+        </section>
+
+        <section class="pos-card" style="flex:0 0 auto">
+          <div class="head"><h3>Metoda de plata</h3></div>
+          <div class="body"><div class="pay-methods" id="payMethods"></div></div>
+        </section>
+
+        <section class="pos-card" style="flex:0 0 auto">
+          <div class="head"><h3>Actiuni</h3></div>
+          <div class="body">
+            <div class="action-stack">
+              <button class="btn btn-success btn-lg btn-block" id="btnPay">💰 Plateste (F2)</button>
+              <div class="row">
+                <button class="btn btn-warning grow" id="btnSuspend">⏸ Suspenda</button>
+                <button class="btn btn-danger grow" id="btnCancel">✕ Anuleaza</button>
+              </div>
+              <button class="btn btn-outline btn-block" id="btnResume">↩ Reluare comanda suspendata</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="pos-card" style="flex:1 1 auto">
+          <div class="head"><h3>Mini-raport zi</h3></div>
+          <div class="body">
+            <div class="mini-report">
+              <div class="mini-stat"><div class="l">Vanzari</div><div class="v" id="miniSales" style="color:var(--success)">0</div></div>
+              <div class="mini-stat"><div class="l">Tranzactii</div><div class="v" id="miniTx">0</div></div>
+              <div class="mini-stat"><div class="l">Medie cos</div><div class="v" id="miniAvg">0</div></div>
+              <div class="mini-stat"><div class="l">Suspendate</div><div class="v" id="miniSuspended">0</div></div>
+            </div>
+            <p class="small muted mt-2">Valori calculate pe ziua calendaristica curenta.</p>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: PLATA ================= -->
+  <div class="modal-backdrop" id="payModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="payModalTitle">Incasare</h3>
+        <button class="close-x" data-close="payModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="pay-summary">
+          <div class="lbl">Total de incasat</div>
+          <div class="amt" id="payTotal">0,00 RON</div>
+          <div class="lbl mt-2" id="payMethodRow">💵 Numerar</div>
+        </div>
+
+        <div class="field">
+          <label for="payReceived">Suma primita</label>
+          <input class="input" id="payReceived" type="number" step="0.01" min="0" placeholder="0.00" style="font-size:22px;font-weight:700">
+        </div>
+
+        <div class="row-wrap mb-2" id="quickCash"></div>
+
+        <div class="keypad" id="keypad">
+          <button data-key="7">7</button><button data-key="8">8</button><button data-key="9">9</button>
+          <button data-key="4">4</button><button data-key="5">5</button><button data-key="6">6</button>
+          <button data-key="1">1</button><button data-key="2">2</button><button data-key="3">3</button>
+          <button data-key=".">,</button><button data-key="0">0</button><button data-key="⌫">⌫</button>
+          <button data-key="C" style="grid-column:1/-1;background:var(--danger-soft);color:var(--danger)">Sterge tot</button>
+        </div>
+
+        <div class="spread mt-4" style="background:var(--success-soft);padding:12px 16px;border-radius:8px">
+          <b>Rest de returnat</b>
+          <b class="mono" id="payChange" style="font-size:22px;color:var(--success-dark)">0,00 RON</b>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-outline" data-close="payModal">Anuleaza</button>
+        <button class="btn btn-success btn-lg" id="btnConfirmPay">Confirma plata</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: BON FISCAL ================= -->
+  <div class="modal-backdrop" id="receiptModal">
+    <div class="modal">
+      <div class="modal-head"><h3>✅ Plata finalizata</h3><button class="close-x" data-close="receiptModal">×</button></div>
+      <div class="modal-body" id="receiptBody"></div>
+      <div class="modal-foot">
+        <button class="btn btn-outline" data-close="receiptModal">Inchide</button>
+        <button class="btn btn-info" onclick="window.printReceipt()">🖨 Printeaza bon</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: COMENZI SUSPENDATE ================= -->
+  <div class="modal-backdrop" id="resumeModal">
+    <div class="modal wide">
+      <div class="modal-head"><h3>Comenzi suspendate</h3><button class="close-x" data-close="resumeModal">×</button></div>
+      <div class="modal-body" id="resumeList"></div>
+      <div class="modal-foot"><button class="btn btn-outline" data-close="resumeModal">Inchide</button></div>
+    </div>
+  </div>
+
+  <div id="toastHost"></div>
+  <div id="printArea"></div>
+
+  <script src="js/db.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/pos-handler.js"></script>
+</body>
+</html>

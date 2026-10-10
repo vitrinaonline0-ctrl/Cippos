@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2c3e50">
+  <title>POS System — Setari</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%232c3e50'/><text x='50%25' y='58%25' font-size='18' text-anchor='middle' fill='%2327ae60'>₺</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <header class="app-header" id="appHeader"></header>
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1>⚙️ Setari &amp; configurare</h1>
+        <p>Parametri fiscali, program de lucru, backup date si jurnal de audit.</p>
+      </div>
+    </div>
+
+    <div class="settings-grid">
+
+      <!-- ---------- Parametri generali ---------- -->
+      <form class="card" id="settingsForm">
+        <div class="card-title"><h3>🏢 Date firma &amp; fiscalitate</h3></div>
+
+        <div class="field">
+          <label for="setCompany">Denumire firma</label>
+          <input class="input" id="setCompany" maxlength="120">
+        </div>
+        <div class="field-row">
+          <div class="field"><label for="setFiscal">Cod fiscal (CUI)</label><input class="input" id="setFiscal" maxlength="30"></div>
+          <div class="field"><label for="setPhone">Telefon</label><input class="input" id="setPhone" maxlength="30"></div>
+        </div>
+        <div class="field"><label for="setAddress">Adresa</label><input class="input" id="setAddress" maxlength="160"></div>
+
+        <div class="divider"></div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="setCurrency">Moneda</label>
+            <select class="select" id="setCurrency">
+              <option value="RON">RON (leu)</option>
+              <option value="EUR">EUR (euro)</option>
+              <option value="USD">USD (dolar)</option>
+              <option value="GBP">GBP (lira)</option>
+              <option value="HUF">HUF (forint)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="setVat">Cota TVA (%)</label>
+            <input class="input" id="setVat" type="number" step="0.01" min="0" max="100">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="setVatMode">Mod calcul TVA</label>
+          <select class="select" id="setVatMode">
+            <option value="excl">Preturi FARA TVA → subtotal + TVA = total (implicit)</option>
+            <option value="incl">Preturi CU TVA → TVA se extrage din total</option>
+          </select>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field-row">
+          <div class="field"><label for="setStart">Ora inceput zi lucru</label><input class="input" id="setStart" type="time"></div>
+          <div class="field"><label for="setEnd">Ora sfarsit zi lucru</label><input class="input" id="setEnd" type="time"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label for="setPrefix">Prefix chitanta</label><input class="input" id="setPrefix" maxlength="6" autocapitalize="characters"></div>
+          <div class="field"><label for="setTimeout">Timeout sesiune (min)</label><input class="input" id="setTimeout" type="number" min="1" max="480"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <label class="switch mb-2"><input type="checkbox" id="setStockAlert"><span class="track"></span> Notificare stoc minim in ecranul de vanzare</label>
+        <div class="field mt-2">
+          <label for="setStockThreshold">Prag implicit stoc minim</label>
+          <input class="input" id="setStockThreshold" type="number" min="0">
+        </div>
+        <label class="switch"><input type="checkbox" id="setClientDisplay"><span class="track"></span> Afiseaza ecranul client dupa fiecare vanzare</label>
+
+        <button class="btn btn-success btn-block mt-4" id="btnSaveSettings" type="submit">💾 Salveaza setarile</button>
+      </form>
+
+      <!-- ---------- Coloana dreapta ---------- -->
+      <div>
+        <div class="card">
+          <div class="card-title"><h3>💾 Backup &amp; restaurare</h3></div>
+          <p class="small muted">Datele sunt salvate local in browser (localStorage) si dublate automat in IndexedDB.
+             Fa un backup inainte de schimbari majore sau de mutarea pe alt dispozitiv.</p>
+          <div class="row-wrap mt-2">
+            <button class="btn btn-success" id="btnBackup">⬇ Exporta backup (JSON)</button>
+            <button class="btn btn-outline" id="btnRestoreFile">⬆ Restaureaza din fisier</button>
+            <button class="btn btn-outline" id="btnRestoreIdb">♻ Restaureaza din IndexedDB</button>
+            <input type="file" id="restoreFile" accept="application/json,.json" class="hidden">
+          </div>
+          <div class="divider"></div>
+          <div id="storageInfo"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><h3>🎫 Vouchere de discount</h3><span class="hint">se aplica din ecranul de vanzare</span></div>
+          <div class="table-wrap mb-4">
+            <table class="data"><tbody id="voucherList"></tbody></table>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="newVoucherCode">Cod</label><input class="input" id="newVoucherCode" autocapitalize="characters" placeholder="BINE10"></div>
+            <div class="field"><label for="newVoucherType">Tip</label>
+              <select class="select" id="newVoucherType"><option value="percent">Procent (%)</option><option value="fixed">Valoare fixa</option></select>
+            </div>
+            <div class="field"><label for="newVoucherValue">Valoare</label><input class="input" id="newVoucherValue" type="number" step="0.01" min="0"></div>
+          </div>
+          <div class="field"><label for="newVoucherDesc">Descriere</label><input class="input" id="newVoucherDesc" placeholder="ex: reducere de bun venit"></div>
+          <button class="btn btn-outline" id="btnAddVoucher">+ Adauga voucher</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- Jurnal audit ---------- -->
+    <div class="card mt-4">
+      <div class="card-title">
+        <h3>📜 Jurnal de audit (activitate per utilizator)</h3>
+        <div class="row">
+          <input class="input" id="logFilter" placeholder="Filtreaza dupa utilizator sau actiune…" style="min-width:240px">
+          <button class="btn btn-sm btn-outline" id="btnExportLog">⬇ Export CSV</button>
+          <button class="btn btn-sm btn-danger" id="btnClearLog">Goleste</button>
+        </div>
+      </div>
+      <div class="log-list" id="logList"></div>
+    </div>
+
+    <!-- ---------- Zona periculoasa ---------- -->
+    <div class="card mt-4 hidden" id="dangerZone" style="border-color:#f5b7b1;background:#fffafa">
+      <div class="card-title"><h3 style="color:var(--danger)">⚠ Zona periculoasa</h3></div>
+      <p class="small muted">Resetarea sterge definitiv toate datele locale (produse, comenzi, operatori, setari)
+        si reincarca setul de date demo.</p>
+      <button class="btn btn-danger" id="btnResetAll">Reseteaza toate datele</button>
+    </div>
+  </main>
+
+  <div id="toastHost"></div>
+
+  <script src="js/db.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/settings.js"></script>
+</body>
+</html>

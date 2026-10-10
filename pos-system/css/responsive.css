@@ -1,0 +1,116 @@
+/* ==========================================================================
+   responsive.css — Mobile-first breakpoints
+   Breakpoints: 480 (telefon mic) | 540 (ecran client) | 768 (tableta)
+                1024 (laptop mic) | 1440+ (desktop 1920)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   TELEFOANE (< 768px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 767px) {
+  :root { --space-5: 16px; --space-6: 18px; }
+
+  .app-header { padding: 0 var(--space-2); gap: var(--space-2); height: auto; min-height: var(--header-h); flex-wrap: wrap; padding-top: 6px; padding-bottom: 6px; }
+  .brand { font-size: var(--fs-md); }
+  .brand small { display: none; }
+  .main-nav { order: 3; width: 100%; }
+  .main-nav a { flex: 1; justify-content: center; padding: 0 var(--space-2); font-size: var(--fs-xs); }
+  .main-nav a .nav-label { display: none; }
+  .header-right { gap: var(--space-2); }
+  .user-chip .meta { display: none; }
+  .session-timer { display: none; }
+
+  .page { padding: var(--space-3); }
+  .page-head { flex-direction: column; align-items: stretch; }
+  .page-head-actions .btn { flex: 1; }
+
+  .kpi-grid { grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+  .kpi { padding: var(--space-3); }
+  .kpi .kpi-value { font-size: var(--fs-lg); }
+
+  .field-row, .field-row-3 { grid-template-columns: 1fr; }
+  .filters-bar { flex-direction: column; align-items: stretch; }
+  .filters-bar .field { width: 100%; min-width: 0; }
+  .filters-bar .btn { width: 100%; }
+
+  /* Login: o singura coloana */
+  .login-shell { grid-template-columns: 1fr; }
+  .login-hero { display: none; }
+  .login-panel { padding: var(--space-4); }
+
+  /* Tabele: mod card pe mobil */
+  table.data thead { display: none; }
+  table.data, table.data tbody, table.data tr, table.data td { display: block; width: 100%; }
+  table.data tr {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    margin-bottom: var(--space-2); padding: var(--space-2); background: #fff;
+  }
+  table.data td {
+    display: flex; justify-content: space-between; gap: var(--space-3);
+    border: none; padding: 4px 0; text-align: right;
+  }
+  table.data td::before {
+    content: attr(data-label);
+    font-weight: 700; font-size: var(--fs-xs);
+    color: var(--text-muted); text-transform: uppercase; text-align: left; flex: none;
+  }
+  table.data td.actions { justify-content: flex-end; }
+  table.data td.actions::before { display: none; }
+  .table-wrap { border: none; overflow: visible; }
+
+  .modal { max-height: calc(100vh - 16px); }
+  .modal-foot { flex-direction: column-reverse; }
+  .modal-foot .btn { width: 100%; }
+}
+
+/* --------------------------------------------------------------------------
+   ECRAN CLIENT — optimizat pentru 540x960 si telefoane
+   -------------------------------------------------------------------------- */
+@media (max-width: 600px) {
+  .client-head .co { font-size: var(--fs-md); }
+  .client-item .pic { width: 46px; height: 46px; font-size: 22px; }
+  .client-trow.grand { font-size: 28px; }
+  .thanks-screen h1 { font-size: 32px; }
+  .thanks-screen .check { width: 96px; height: 96px; font-size: 50px; }
+  .thanks-screen .receipt-no { font-size: var(--fs-lg); letter-spacing: 1px; }
+}
+
+/* --------------------------------------------------------------------------
+   TABLETA (768px - 1023px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .pos-grid { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; overflow-y: auto; }
+  .pos-shell { height: auto; min-height: calc(100vh - var(--header-h)); overflow: visible; }
+  .pos-panel { overflow: visible; }
+  .pos-card > .body { max-height: 40vh; }
+  .main-nav a .nav-label { display: none; }
+}
+
+/* --------------------------------------------------------------------------
+   LAPTOP MIC (1024px - 1439px) — grid POS 3 coloane comprimat
+   -------------------------------------------------------------------------- */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .pos-grid { grid-template-columns: minmax(0, .95fr) minmax(0, 1.9fr) minmax(0, 1fr); gap: var(--space-2); padding: var(--space-2); }
+  .quick-grid { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); }
+  .cart-table .prod .ico { display: none; }
+  .user-chip .meta span { display: none; }
+}
+
+/* --------------------------------------------------------------------------
+   DESKTOP MARE (1440px+) — layout operator 1920x1080
+   -------------------------------------------------------------------------- */
+@media (min-width: 1440px) {
+  .pos-grid { gap: var(--space-4); padding: var(--space-4); }
+  .quick-grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); }
+  .cart-table { font-size: var(--fs-md); }
+  .page { padding: var(--space-6); }
+}
+
+/* --------------------------------------------------------------------------
+   POZITIONARE LANDSCAPE PE TELEFON (ecran client rotit)
+   -------------------------------------------------------------------------- */
+@media (max-height: 500px) and (orientation: landscape) {
+  .client-shell { height: auto; min-height: 100vh; }
+  .client-head { padding: var(--space-2); }
+  .client-waiting .big { font-size: 36px; }
+}

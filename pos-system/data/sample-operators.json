@@ -1,0 +1,71 @@
+{
+  "_comentariu": "Parolele NU sunt stocate aici in clar. La prima rulare app.js face seed si genereaza hash SHA-256 cu salt. Parolele implicite sunt listate in README.",
+  "users": [
+    {
+      "id": "u-admin",
+      "name": "Andrei Popescu",
+      "email": "admin@magazin.ro",
+      "username": "admin",
+      "password": "admin123",
+      "role": "admin",
+      "active": true,
+      "phone": "0722 100 200",
+      "createdAt": "2026-01-01T09:00:00.000Z"
+    },
+    {
+      "id": "u-manager",
+      "name": "Ioana Ionescu",
+      "email": "manager@magazin.ro",
+      "username": "manager",
+      "password": "manager123",
+      "role": "manager",
+      "active": true,
+      "phone": "0722 100 300",
+      "createdAt": "2026-01-02T09:00:00.000Z"
+    },
+    {
+      "id": "u-operator",
+      "name": "Mihai Georgescu",
+      "email": "mihai@magazin.ro",
+      "username": "operator",
+      "password": "operator123",
+      "role": "operator",
+      "active": true,
+      "phone": "0722 100 400",
+      "createdAt": "2026-01-03T09:00:00.000Z"
+    },
+    {
+      "id": "u-operator2",
+      "name": "Elena Dumitrescu",
+      "email": "elena@magazin.ro",
+      "username": "elena",
+      "password": "elena123",
+      "role": "operator",
+      "active": true,
+      "phone": "0722 100 500",
+      "createdAt": "2026-01-04T09:00:00.000Z"
+    },
+    {
+      "id": "u-viewer",
+      "name": "Radu Stan (Contabil)",
+      "email": "contabil@magazin.ro",
+      "username": "viewer",
+      "password": "viewer123",
+      "role": "viewer",
+      "active": true,
+      "phone": "",
+      "createdAt": "2026-01-06T09:00:00.000Z"
+    },
+    {
+      "id": "u-fost",
+      "name": "Vlad Munteanu",
+      "email": "vlad@magazin.ro",
+      "username": "vlad",
+      "password": "vlad123",
+      "role": "operator",
+      "active": false,
+      "phone": "",
+      "createdAt": "2026-01-07T09:00:00.000Z"
+    }
+  ]
+}
